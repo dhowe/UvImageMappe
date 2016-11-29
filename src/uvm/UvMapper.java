@@ -15,7 +15,7 @@ public class UvMapper extends PApplet {
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
-	public static String CONVERT_ARGS = " -matte -virtual-pixel transparent -interpolate Spline -distort BilinearForward ";
+	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline -distort BilinearForward ";
 
 	ArrayList<Quad> quads = new ArrayList<Quad>();
 	ArrayList<UvImage> ads = new ArrayList<UvImage>();
