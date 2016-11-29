@@ -17,19 +17,12 @@ public class UvImage {
 		this.height = this.image.height;
 		this.imageIn = UvMapper.IMAGE_DIR + imageName;
 		this.imageOut = changeExt(UvMapper.OUTPUT_DIR + imageName, ".png");
-		//this.imageOut = rename(imageName, "-warp");
 	}
 
 	public String changeExt(String fileName, String ext) {
 		
 		String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
 		return tokens[0] + ext;
-	}
-	
-	public String rename(String fileName, String postfix) {
-		
-		String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
-		return tokens[0] + postfix + '.' + tokens[1]; 
 	}
 
 	public float aspectRation() {
