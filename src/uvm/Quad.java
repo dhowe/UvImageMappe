@@ -9,6 +9,7 @@ public class Quad implements Comparable<Quad> {
 	public float[] points;
 	public UvImage image;
 	public int id;
+	private float minX, minY, maxX, maxY;
 
 	private PImage warped;
 
@@ -16,6 +17,11 @@ public class Quad implements Comparable<Quad> {
 
 		this.points = pts;
 		this.id = ID_GEN++;
+		this.minX = 10000;//depends on the UV data
+		this.minY = 10000;
+		this.maxX = 0;
+		this.maxY = 0;
+
 	}
 
 	public Quad image(UvImage image) {
@@ -25,10 +31,12 @@ public class Quad implements Comparable<Quad> {
 	}
 
 	public String toConvertCommand() {
-
-		float[] npts = normalizeQuadPosition();
 		
+		calculatQuadBorder();
+		
+		float[] npts = normalizeQuadPosition();
 		int[] newImageSize = getNewImageSize();
+		
 		image.width = newImageSize[0];
 		image.height = newImageSize[1];
 	
@@ -36,6 +44,7 @@ public class Quad implements Comparable<Quad> {
 		for (int i = 0, j = 0; i < srcDst.length; i++) {
 			if (i % 4 > 1) srcDst[i] = npts[j++];
 		}
+		
 		srcDst[4] = srcDst[8] = image.width;
 		srcDst[9] = srcDst[13] = image.height;
     
@@ -53,14 +62,21 @@ public class Quad implements Comparable<Quad> {
 	private float[] normalizeQuadPosition() {
 
 		float[] n = new float[points.length];
+		float referenceX;
+		float referenceY;
 		for (int i = 0; i < n.length; i++)
-			n[i] = points[i] - (i % 2 == 0 ? points[0] : points[1]);
+			n[i] = points[i] - (i % 2 == 0 ? minX : minY);
 		return n;
 	}
 
 	private int[] getNewImageSize() {
-
-		float maxX = 0, minX = 100000, maxY = 0, minY = 100000;
+		System.out.println(minX + " " + minY + " " +maxX +  " " + maxY);
+		int[] size = {Math.round(maxX-minX), Math.round(maxY-minY)};
+		return size;
+	}
+	
+	private void calculatQuadBorder() {
+		
 		for (int i = 0; i < points.length; i += 2) {
 			
 			if (points[i] > maxX) maxX = points[i];
@@ -68,9 +84,9 @@ public class Quad implements Comparable<Quad> {
 			if (points[i + 1] > maxY) maxY = points[i+1];
 			if (points[i + 1] < minY) minY = points[i+1];
 		}
-
-		int[] size = {Math.round(maxX-minX), Math.round(maxY-minY)};
-		return size;
+		
+//		System.out.println(minX + " " + minY + " " +maxX +  " " + maxY);
+		
 	}
 	
 	public float area() {
@@ -105,7 +121,7 @@ public class Quad implements Comparable<Quad> {
 		p.stroke(0);
 //		p.imageMode(PApplet.CORNERS);
 		
-		p.image(this.warped, points[0], points[1], image.width, image.height);
+		p.image(this.warped, minX, minY, image.width, image.height);
 		p.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 	
 		return this;
