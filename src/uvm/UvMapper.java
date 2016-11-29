@@ -38,17 +38,10 @@ public class UvMapper extends PApplet {
 		}
 
 		// Step #2: import data and create the Quads 
-		ReadTemps(DATA_FILE);
+		readTemps(DATA_FILE);
 		for (int i = 0; i < data.size(); i++) {	
 			quads.add(new Quad(data.get(i)));
 		}
-
-		// Step #5: sort the quads
-//		quads.sort(new Comparator<Quad>() {
-//			public int compare(Quad q1, Quad q2) {
-//				return q1.compareTo(q2);
-//			};
-//		});
 
 		// Step #6: loop over quads, assigning best fitting ad-image (TODO)
 		for (Iterator it = quads.iterator(); it.hasNext();) {
@@ -100,7 +93,7 @@ public class UvMapper extends PApplet {
 		return -1;
 	}
 	
-	public void ReadTemps(String path) {
+	public void readTemps(String path) {
 
 		// create token1
 		String token1 = "";
