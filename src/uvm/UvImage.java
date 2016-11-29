@@ -8,6 +8,7 @@ public class UvImage {
 	public int quadId = -1;
 	public int width, height;
 	public String imageIn, imageOut;
+	public boolean used = false;
 
 	public UvImage(PApplet p, String imageName) {
 		

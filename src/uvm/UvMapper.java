@@ -11,19 +11,21 @@ public class UvMapper extends PApplet {
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
+	public static String DATA_FILE = "data/data.txt";
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
-	public static String CONVERT_CMD = "/usr/local/bin/convert ";
-	public static String CONVERT_ARGS = " -matte -virtual-pixel transparent -interpolate Spline -distort BilinearForward ";
+	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
+	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline -distort BilinearForward ";
 
 	ArrayList<Quad> quads = new ArrayList<Quad>();
 	ArrayList<UvImage> ads = new ArrayList<UvImage>();
-
-	float[][] test = { { 100, 100, 426, 100, 416, 360, 150, 380 } }; // TODO: tmp-replace
+	ArrayList<float[]> data = new ArrayList<float[]>();
+	
+//	float[][] test = { { 200,10,700,100,650,500,316,260 } }; 
 
 	public void settings() {
 
-		size(500, 500);
+		size(800, 700);
 	}
 
 	public void setup() {
@@ -36,26 +38,31 @@ public class UvMapper extends PApplet {
 		}
 
 		// Step #2: import data and create the Quads 
-		// (TODO: replace 'test' with .txt file in data folder)
-		for (int i = 0; i < test.length; i++) {
-			
-			quads.add(new Quad(test[i]));
+		ReadTemps(DATA_FILE);
+		for (int i = 0; i < data.size(); i++) {	
+			quads.add(new Quad(data.get(i)));
 		}
 
 		// Step #5: sort the quads
-		quads.sort(new Comparator<Quad>() {
-			public int compare(Quad q1, Quad q2) {
-				return q1.compareTo(q2);
-			};
-		});
+//		quads.sort(new Comparator<Quad>() {
+//			public int compare(Quad q1, Quad q2) {
+//				return q1.compareTo(q2);
+//			};
+//		});
 
 		// Step #6: loop over quads, assigning best fitting ad-image (TODO)
 		for (Iterator it = quads.iterator(); it.hasNext();) {
-			
+
 			Quad q = (Quad) it.next();
 			for (Iterator it2 = ads.iterator(); it2.hasNext();) {
+
 				UvImage img = (UvImage) it2.next();
-				q.image(img);
+
+				if (!img.used) {
+					q.image(img);
+					img.used = true;
+					break;
+				}
 			}
 		}
 
@@ -92,6 +99,47 @@ public class UvMapper extends PApplet {
 		}
 		return -1;
 	}
+	
+	public void ReadTemps(String path) {
+
+		// create token1
+		String token1 = "";
+		// create Scanner inFile1
+		try {
+			Scanner inFile1 = new Scanner(new File(path));
+
+			List<String> temps = new ArrayList<String>();
+
+			// while loop
+			while (inFile1.hasNext()) {
+				// find next line
+				token1 = inFile1.next();
+				temps.add(token1);
+			}
+			inFile1.close();
+
+			String[] lines = temps.toArray(new String[0]);
+
+			for (String s : lines) {
+
+				String[] pointsS = s.split(",");
+				float[] pointsF = new float[pointsS.length];
+
+				for (int i = 0; i < pointsS.length; i++) {
+					pointsF[i] = Float.parseFloat(pointsS[i]);
+//					System.out.println(pointsF[i]);
+				}
+				data.add(pointsF);
+
+			}
+
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 
 	public static void main(String[] args) {
 
