@@ -19,11 +19,11 @@ public class UvMapper extends PApplet {
 	ArrayList<Quad> quads = new ArrayList<Quad>();
 	ArrayList<UvImage> ads = new ArrayList<UvImage>();
 
-	float[][] test = { { 10, 10, 326, 10, 316, 260, 0, 280 } }; // TODO: tmp-replace
+	float[][] test = { { 100, 100, 426, 100, 416, 360, 150, 380 } }; // TODO: tmp-replace
 
 	public void settings() {
 
-		size(400, 400);
+		size(500, 500);
 	}
 
 	public void setup() {
