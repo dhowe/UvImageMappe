@@ -44,19 +44,25 @@ public class UvMapper extends PApplet {
 		}
 
 		// Step #5: sort the quads
-		quads.sort(new Comparator<Quad>() {
-			public int compare(Quad q1, Quad q2) {
-				return q1.compareTo(q2);
-			};
-		});
+//		quads.sort(new Comparator<Quad>() {
+//			public int compare(Quad q1, Quad q2) {
+//				return q1.compareTo(q2);
+//			};
+//		});
 
 		// Step #6: loop over quads, assigning best fitting ad-image (TODO)
 		for (Iterator it = quads.iterator(); it.hasNext();) {
-			
+
 			Quad q = (Quad) it.next();
 			for (Iterator it2 = ads.iterator(); it2.hasNext();) {
+
 				UvImage img = (UvImage) it2.next();
-				q.image(img);
+
+				if (!img.used) {
+					q.image(img);
+					img.used = true;
+					break;
+				}
 			}
 		}
 
