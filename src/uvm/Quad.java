@@ -80,7 +80,21 @@ public class Quad implements Comparable<Quad> {
 
 	public float aspectRatio() {
 
-		return image.aspectRation();
+		// Calculate the middle points
+		float[][] mPs = new float[4][];
+		
+		for (int i = 0; i < mPs.length; i++) {
+			if (i < 3)
+				mPs[i] = new float[] { (points[2 + 2 * i] + points[2 * i]) / 2, (points[3 + 2 * i] + points[1 + 2 * i]) / 2 };
+			else
+				mPs[i] = new float[] { (points[6] + points[0]) / 2, (points[7] + points[1]) / 2 };
+			// System.out.println(mPs[i][0] + " " + mPs[i][1]);
+		}
+
+		float h1 = (float) Math.sqrt((mPs[0][0] - mPs[2][0]) * (mPs[0][0] - mPs[2][0]) + (mPs[0][1] - mPs[2][1]) * (mPs[0][1] - mPs[2][1]));
+		float h2 = (float) Math.sqrt((mPs[1][0] - mPs[3][0]) * (mPs[1][0] - mPs[3][0]) + (mPs[1][1] - mPs[3][1]) * (mPs[1][1] - mPs[3][1]));
+
+		return h1 > h2 ? h1 / h2 : h2 / h1;
 	}
 
 	public Quad draw() {

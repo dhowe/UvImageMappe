@@ -32,16 +32,32 @@ public class UvMapper extends PApplet {
 				ads.add(new UvImage(this, files[i]));
 		}
 
-		// Loop over quads, assigning best fitting ad-image (TODO)
+		// Loop over quads, assigning best fitting ad-image
 		for (Quad q : Quad.fromData(this, DATA_FILE)) {
-			for (UvImage img : ads) {
-				if (!img.used) {
-					
-					q.image(img); // scale/warp image
-					img.used = true;
-					break;
+
+			float distance = Math.abs(ads.get(0).aspectRation() - q.aspectRatio());
+			int idx = 0;
+			System.out.println("Q:" + q.aspectRatio());
+
+			for (int i = 0; i < ads.size(); i++) {
+				UvImage img = ads.get(i);
+				// System.out.println("I" + i + ": " + img.aspectRation());
+				float cdistance = Math.abs(img.aspectRation() - q.aspectRatio());
+				// System.out.println(i + " " + cdistance + " " + distance);
+				if (cdistance <= distance) {
+					if (!img.used) {
+						idx = i;
+						distance = cdistance;
+					}
+					else {
+						System.out.println("Used: " + ads.get(i).imageIn);
+					}
 				}
 			}
+
+			q.image(ads.get(idx));
+			ads.get(idx).used = true;
+			System.out.println("Image: " + ads.get(idx).imageIn);
 			q.draw();
 		}
 	}
