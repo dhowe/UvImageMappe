@@ -187,16 +187,16 @@ public class Quad {
 		if (this.warped != null) parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
 
 		parent.noFill();
-		parent.fill(0,200,0);
-		if (!isClockwise())
-			parent.fill(200,0,0);
+//		parent.fill(0,200,0);
+//		if (!isClockwise())
+//			parent.fill(200,0,0);
 		parent.stroke(0);
 		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		parent.stroke(100);
 		// parent.rect(bounds[0], bounds[1], bounds[2], bounds[3]);
-		for (int i = 0; i < points.length; i += 2) {
-			parent.text(i + "," + (i + 1), points[i], points[i + 1]);
-		}
+		
+		//for (int i = 0; i < points.length; i += 2)
+			//parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 
 		return this;
 	}
