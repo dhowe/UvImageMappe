@@ -1,13 +1,12 @@
 package uvm;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
 
 import org.apache.commons.exec.*;
 
 import processing.core.*;
 
-public class Quad implements Comparable<Quad> {
+public class Quad {
 
 	public UvImage image;
 	public float[] points, bounds;
@@ -20,7 +19,7 @@ public class Quad implements Comparable<Quad> {
 		this.parent = p;
 		this.points = points;
 		for(int i=0;i<8;i++)
-			this.points[i] = this.points[i]*p.displayHeight;
+			this.points[i] = this.points[i];//*p.displayHeight;
 		this.bounds = bounds();
 	}
 
@@ -101,7 +100,8 @@ public class Quad implements Comparable<Quad> {
 
 	public Quad draw() {
 
-		parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
+		if (this.warped != null)
+			parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
 
 		parent.noFill();
 		parent.stroke(0);
@@ -153,19 +153,4 @@ public class Quad implements Comparable<Quad> {
 		}
 		return Math.abs(area / 2f);
 	}
-
-	public int compareTo(Quad o) {
-
-		return aspectRatio() > o.aspectRatio() ? 1 : -1;
-	}
-
-	public static void sort(ArrayList<Quad> quads) {
-
-		quads.sort(new Comparator<Quad>() {
-			public int compare(Quad q1, Quad q2) {
-				return q1.compareTo(q2);
-			};
-		});
-	}
-
 }

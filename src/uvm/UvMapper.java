@@ -1,7 +1,7 @@
 package uvm;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 
 import processing.core.PApplet;
 
@@ -9,7 +9,7 @@ public class UvMapper extends PApplet {
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/female_uv_test.txt";
+	public static String DATA_FILE = "data/data.txt";
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
@@ -31,35 +31,49 @@ public class UvMapper extends PApplet {
 			if (files[i].matches(".*\\.(png|gif|jpg|jpeg)"))
 				ads.add(new UvImage(this, files[i]));
 		}
+		
+		ArrayList<Quad> quads = Quad.fromData(this, DATA_FILE);
+		quads.sort(new Comparator<Quad>() {
+			public int compare(Quad q1, Quad q2) {
+				return q1.aspectRatio() > q2.aspectRatio() ? -1 : 1;
+			}
+		});
 
 		// Loop over quads, assigning best fitting ad-image
-		for (Quad q : Quad.fromData(this, DATA_FILE)) {
-
-			float distance = Math.abs(10 - q.aspectRatio());
-			int idx = 0;
-			System.out.println("Q:" + q.aspectRatio());
-
-			for (int i = 0; i < ads.size(); i++) {
-				UvImage img = ads.get(i);
-				// System.out.println("I" + i + ": " + img.aspectRation());
-				float cdistance = Math.abs(img.aspectRation() - q.aspectRatio());
-				// System.out.println(i + " " + cdistance + " " + distance);
-				if (cdistance <= distance) {
-					if (!img.used) {
-						idx = i;
-						distance = cdistance;
-					}
-					else {
-						System.out.println("Used: " + ads.get(i).imageIn);
+		for (Quad q : quads) {
+			
+			//System.out.println("Q:" + q.aspectRatio());
+			UvImage bestImg = null;
+			float bestDist = Float.MAX_VALUE;
+			
+			System.out.println("START "+bestDist);
+			for (UvImage img: ads) {
+				
+				if (!img.used) {
+					// System.out.println("I" + i + ": " + img.aspectRation());
+					float cdistance = distance(img, q);
+	
+					// System.out.println(i + " " + cdistance + " " + distance);
+					if (cdistance < bestDist) {
+							System.out.println("NEW BEST!  "+cdistance);
+							bestImg = img;
+							bestDist = cdistance;
 					}
 				}
 			}
 
-			q.image(ads.get(idx));
-			ads.get(idx).used = true;
-			System.out.println("Image: " + ads.get(idx).imageIn);
+			bestImg.used = true;
+			q.image(bestImg);
+			
+			//System.out.println("Image: " + bestImg.imageIn);
+			
 			q.draw();
 		}
+	}
+
+	public float distance(UvImage img, Quad q) {
+
+		return Math.abs(img.aspectRation() - q.aspectRatio());
 	}
 
 	public static void main(String[] args) {
