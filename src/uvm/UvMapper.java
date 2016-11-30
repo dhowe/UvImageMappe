@@ -9,7 +9,7 @@ public class UvMapper extends PApplet {
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/data.txt";
+	public static String DATA_FILE = "data/female_uv_test.txt";
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
@@ -19,7 +19,7 @@ public class UvMapper extends PApplet {
 
 	public void settings() {
 
-		size(800, 700);
+		size(this.displayHeight, this.displayHeight);
 	}
 
 	public void setup() {
@@ -35,7 +35,7 @@ public class UvMapper extends PApplet {
 		// Loop over quads, assigning best fitting ad-image
 		for (Quad q : Quad.fromData(this, DATA_FILE)) {
 
-			float distance = Math.abs(ads.get(0).aspectRation() - q.aspectRatio());
+			float distance = Math.abs(10 - q.aspectRatio());
 			int idx = 0;
 			System.out.println("Q:" + q.aspectRatio());
 

@@ -19,6 +19,8 @@ public class Quad implements Comparable<Quad> {
 
 		this.parent = p;
 		this.points = points;
+		for(int i=0;i<8;i++)
+			this.points[i] = this.points[i]*p.displayHeight;
 		this.bounds = bounds();
 	}
 
