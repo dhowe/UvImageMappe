@@ -9,11 +9,11 @@ public class UvMapper extends PApplet {
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/data.txt";
+	public static String DATA_FILE = "data/noTriangle.txt";
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
-	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline -distort BilinearForward ";
+	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
 
   // float[][] test = { { 200,10,700,100,650,500,316,260 } }; 
 
@@ -32,13 +32,21 @@ public class UvMapper extends PApplet {
 				ads.add(new UvImage(this, files[i]));
 		}
 		
+	//sort the images by area
+		ads.sort(new Comparator<UvImage>() {
+			public int compare(UvImage img1, UvImage img2) {
+				return img1.width * img1.height  >  img2.width * img2.height ? -1 : 1;
+			}
+		});
+		
+		//sort the quad by area
 		ArrayList<Quad> quads = Quad.fromData(this, DATA_FILE);
 		quads.sort(new Comparator<Quad>() {
 			public int compare(Quad q1, Quad q2) {
-				return q1.aspectRatio() > q2.aspectRatio() ? -1 : 1;
+				return q1.area() > q2.area() ? -1 : 1;
 			}
 		});
-
+		
 		// Loop over quads, assigning best fitting ad-image
 		for (Quad q : quads) {
 			
@@ -53,7 +61,7 @@ public class UvMapper extends PApplet {
 					// System.out.println("I" + i + ": " + img.aspectRation());
 					float cdistance = distance(img, q);
 	
-					// System.out.println(i + " " + cdistance + " " + distance);
+					 System.out.println(cdistance + " " + bestDist);
 					if (cdistance < bestDist) {
 							System.out.println("NEW BEST!  "+cdistance);
 							bestImg = img;
