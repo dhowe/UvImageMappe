@@ -1,21 +1,21 @@
 package uvm;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
 
 import processing.core.PApplet;
 
 public class UvMapper extends PApplet {
 
+	public static int MAX_USAGES_PER_IMG = 2, MAX_NUM_IMGS_TO_LOAD = 10000; 
+	public static int MIN_ALLOWED_QUAD_AREA = 400, MIN_ALLOWED_IMG_AREA = 400;
+	
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
 	public static String DATA_FILE = "data/noTriangle.txt";
-
-	public static boolean ROUNT_DATA_TO_INTS = true;
+	
+	public static boolean ROUNT_DATA_TO_INTS = false;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
-
-  // float[][] test = { { 200,10,700,100,650,500,316,260 } }; 
 
 	public void settings() {
 
@@ -24,60 +24,53 @@ public class UvMapper extends PApplet {
 
 	public void setup() {
 
-		// Load images into UvImage objects
-		String[] files = new File(IMAGE_DIR).list();
-		ArrayList<UvImage> ads = new ArrayList<UvImage>();
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].matches(".*\\.(png|gif|jpg|jpeg)"))
-				ads.add(new UvImage(this, files[i]));
-		}
-		
-	//sort the images by area
-		ads.sort(new Comparator<UvImage>() {
-			public int compare(UvImage img1, UvImage img2) {
-				return img1.width * img1.height  >  img2.width * img2.height ? -1 : 1;
-			}
-		});
-		
-		//sort the quad by area
+		ArrayList<UvImage> ads = UvImage.loadFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		ArrayList<Quad> quads = Quad.fromData(this, DATA_FILE);
-		quads.sort(new Comparator<Quad>() {
-			public int compare(Quad q1, Quad q2) {
-				return q1.area() > q2.area() ? -1 : 1;
-			}
-		});
 		
-		// Loop over quads, assigning best fitting ad-image
-		for (Quad q : quads) {
-			
+		int processed = assignImages(ads, quads);
+		
+		System.out.println("\nProcessed "+processed+"/"+ quads.size() + " Quads");
+		
+		Quad.drawAll(quads);
+	}
+
+	// Loop over Quads assigning best fiting ad image to each 
+	protected int assignImages(ArrayList<UvImage> images, ArrayList<Quad> quads) {
+
+		int processed = 0;
+		for (Quad quad : quads) {
+
 			//System.out.println("Q:" + q.aspectRatio());
 			UvImage bestImg = null;
 			float bestDist = Float.MAX_VALUE;
 			
-			System.out.println("START "+bestDist);
-			for (UvImage img: ads) {
+			for (UvImage image: images) {
 				
-				if (!img.used) {
+				if (image.usedCount < MAX_USAGES_PER_IMG) {
 					// System.out.println("I" + i + ": " + img.aspectRation());
-					float cdistance = distance(img, q);
+					float cdistance = distance(image, quad);
 	
-					 System.out.println(cdistance + " " + bestDist);
+					//System.out.println(cdistance + " " + bestDist);
 					if (cdistance < bestDist) {
-							System.out.println("NEW BEST!  "+cdistance);
-							bestImg = img;
+							//System.out.println("NEW BEST!  "+cdistance);
+							bestImg = image;
 							bestDist = cdistance;
 					}
 				}
 			}
-
-			bestImg.used = true;
-			q.image(bestImg);
 			
-			//System.out.println("Image: " + bestImg.imageIn);
+			if (bestImg == null) {
+				//System.err.println("[WARN] No image found for Quad#" + q.id);
+				continue;
+			}
 			
-			q.draw();
+			quad.image(bestImg);
+			processed++;
 		}
+		
+		return processed;
 	}
+
 
 	public float distance(UvImage img, Quad q) {
 

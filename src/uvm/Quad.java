@@ -1,7 +1,7 @@
 package uvm;
 
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.apache.commons.exec.*;
 
@@ -16,16 +16,8 @@ public class Quad {
 	protected PApplet parent;
 	protected int id;
 	
+	static boolean testOnlyOne = false;
 	static int idx = 0;
-	static boolean testOne = false;
-
-	public boolean isClockwise() {
-		int sum = 0;
-		for (int i = 0; i < points.length; i += 2) {
-			sum +=  (points[(i+2)%8] - points[i]) * (points[(i+3)%8] + points[i+1]); 
-		}
-		return sum < 0;
-	}
 	
 	public Quad(PApplet p, float... points) {
 
@@ -36,7 +28,33 @@ public class Quad {
 		fixOrdering();
 		this.bounds = bounds();
 	}
+	
+	public Quad image(UvImage image) {
 
+		this.image = image;
+		this.image.usedCount++;
+
+		String cmd = toConvertCommand();
+		//System.out.println(cmd);
+		if (exec(cmd) != 0) 
+			throw new RuntimeException("Warp failed on: " + this);
+		warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.imageOut);
+		if (warped == null) 
+			System.err.println("[WARN] Unable to load image: " +
+					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $"+cmd);
+		else
+		  System.out.println("Quad#"+id + ": "+image.imageOut+ "  area="+area());			
+		return this;
+	}
+	
+	public boolean isClockwise() {
+		int sum = 0;
+		for (int i = 0; i < points.length; i += 2) {
+			sum +=  (points[(i+2)%8] - points[i]) * (points[(i+3)%8] + points[i+1]); 
+		}
+		return sum < 0;
+	}
+	
 	public float[] centroid() {
 
 		float centerX = 0, centerY = 0;
@@ -45,14 +63,6 @@ public class Quad {
 			centerY += points[i + 1];
 		}
 		return new float[] { centerX / 4f, centerY / 4f };
-	}
-
-	public Quad image(UvImage image) {
-
-		this.image = image;
-		if (exec(toConvertCommand()) != 0) throw new RuntimeException("Warp failed on: " + this);
-		warped = parent.loadImage(this.image.imageOut);
-		return this;
 	}
 
 	public String toConvertCommand() {
@@ -70,14 +80,15 @@ public class Quad {
 		// resize the image before transform: width/ height specifically given,
 		// original aspect ratio ignored
 		
-		String s = UvMapper.CONVERT_CMD + bounds[2] + "x" + bounds[3] + "! " + image.imageIn + UvMapper.CONVERT_ARGS;
+		String s = UvMapper.CONVERT_CMD + bounds[2] + "x" + bounds[3] + "! " 
+				+ UvMapper.IMAGE_DIR + image.imageIn + UvMapper.CONVERT_ARGS;
 
 		for (int i = 0; i < srcDst.length; i++) {
 			s += UvMapper.ROUNT_DATA_TO_INTS ? "" + Math.round(srcDst[i]) : srcDst[i];
 			if (i < srcDst.length - 1) s += ",";
 		}
 
-		return s.trim() + ' ' + image.imageOut;
+		return s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.imageOut;
 	}
 
 	private float[] normalizeQuadPosition() {
@@ -123,7 +134,6 @@ public class Quad {
 	}
 
 	public void fixOrdering() {
-
 		Line2D.Float l1 = new Line2D.Float(points[0], points[1], points[6], points[7]);
 		Line2D.Float l3 = new Line2D.Float(points[0], points[1], points[2], points[3]);
 		if (l1.intersectsLine(points[2], points[3], points[4], points[5])) 
@@ -185,16 +195,17 @@ public class Quad {
 
 	public Quad draw() {
 
-		if (this.warped != null) parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
-
-		parent.noFill();
+		
 //		parent.fill(0,200,0);
 //		if (!isClockwise())
 //			parent.fill(200,0,0);
+		
+		if (this.warped != null) 
+			parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
+		
 		parent.stroke(0);
-		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
-		parent.stroke(100);
-		// parent.rect(bounds[0], bounds[1], bounds[2], bounds[3]);
+		parent.noFill();
+		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
 		
 		//for (int i = 0; i < points.length; i += 2)
 			//parent.text(i + "," + (i + 1), points[i], points[i + 1]);
@@ -211,29 +222,64 @@ public class Quad {
 		}
 		catch (Exception e) {
 //			throw new RuntimeException(e);
-			return 0;
+			return 1;
 		}
 	}
 
 	public static ArrayList<Quad> fromData(PApplet p, String dataFilePath) {
+		return fromData(p, dataFilePath, Integer.MAX_VALUE);
+	}
+	
+	public static ArrayList<Quad> fromData(PApplet p, String dataFilePath, int maxToLoad) {
 
 		ArrayList<Quad> quads = new ArrayList<Quad>();
 		for (String line : p.loadStrings(dataFilePath)) {
 
 			String[] spts = line.split(",");
+			if (spts.length != 8) {
+				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
+				continue;
+			}
 			float[] fpts = new float[spts.length];
 			for (int i = 0; i < spts.length; i++) {
 				fpts[i] = Float.parseFloat(spts[i]);
 			}
+			
 			quads.add(new Quad(p, fpts));
-			if (testOne) break;
+			if (testOnlyOne) break;
 		}
-
+		
+		// Scale the Quads (by sketch size) and ignore tiny ones
+		int removed = 0;
+		for (Iterator<Quad> it = quads.iterator(); it.hasNext();) {
+			Quad quad = it.next();
+			quad.scale(p.width, p.height);
+			if (quad.area() < UvMapper.MIN_ALLOWED_QUAD_AREA ) {
+				it.remove();
+				removed++;
+			}
+		}
+		
+		// Sort the Quads by area
+		quads.sort(new Comparator<Quad>() {
+			public int compare(Quad q1, Quad q2) {
+				return q1.area() > q2.area() ? -1 : 1;
+			}
+		});
+		
+		System.out.println("\nFound " + quads.size()+" Quads (after removing " +
+			removed + " too small) with max-area=" + quads.get(0).area()+"\n");
+		
 		return quads;
 	}
 
-	// ////////////// not used at moment ///////////////////////
+	public static void drawAll(ArrayList<Quad> quads) {
 
+		for (Quad q : quads) {
+			q.draw();
+		}
+	}
+	
 	public float area() {
 
 		float area = 0;
@@ -253,4 +299,12 @@ public class Quad {
 			points[i] += (i % 2 == 0 ? x : y);
 		bounds = bounds();
 	}
+	
+	public void scale(float x, float y) {
+
+		for (int i = 0; i < points.length; i++)
+			points[i] *= (i % 2 == 0 ? x : y);
+		bounds = bounds();
+	}
+	
 }
