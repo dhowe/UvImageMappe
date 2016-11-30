@@ -1,5 +1,6 @@
 package uvm;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 import org.apache.commons.exec.*;
@@ -13,21 +14,43 @@ public class Quad {
 
 	protected PImage warped;
 	protected PApplet parent;
+	protected int id;
+	
+	static int idx = 0;
+	static boolean testOne = false;
 
+	public boolean isClockwise() {
+		int sum = 0;
+		for (int i = 0; i < points.length; i += 2) {
+			sum +=  (points[(i+2)%8] - points[i]) * (points[(i+3)%8] + points[i+1]); 
+		}
+		return sum < 0;
+	}
+	
 	public Quad(PApplet p, float... points) {
+
+		this.id = idx++;
 
 		this.parent = p;
 		this.points = points;
-		for(int i=0;i<8;i++)
-			this.points[i] = this.points[i];//*p.displayHeight;
+		fixOrdering();
 		this.bounds = bounds();
+	}
+
+	public float[] centroid() {
+
+		float centerX = 0, centerY = 0;
+		for (int i = 0; i < points.length; i += 2) {
+			centerX += points[i];
+			centerY += points[i + 1];
+		}
+		return new float[] { centerX / 4f, centerY / 4f };
 	}
 
 	public Quad image(UvImage image) {
 
 		this.image = image;
-		if (exec(toConvertCommand()) != 0) 
-			throw new RuntimeException("Warp failed on: " + this);
+		if (exec(toConvertCommand()) != 0) throw new RuntimeException("Warp failed on: " + this);
 		warped = parent.loadImage(this.image.imageOut);
 		return this;
 	}
@@ -83,7 +106,7 @@ public class Quad {
 
 		// Calculate the middle points
 		float[][] mPs = new float[4][];
-		
+
 		for (int i = 0; i < mPs.length; i++) {
 			if (i < 3)
 				mPs[i] = new float[] { (points[2 + 2 * i] + points[2 * i]) / 2, (points[3 + 2 * i] + points[1 + 2 * i]) / 2 };
@@ -98,14 +121,82 @@ public class Quad {
 		return h1 > h2 ? h1 / h2 : h2 / h1;
 	}
 
+	public void fixOrdering() {
+
+		Line2D.Float l1 = new Line2D.Float(points[0], points[1], points[6], points[7]);
+		Line2D.Float l3 = new Line2D.Float(points[0], points[1], points[2], points[3]);
+		if (l1.intersectsLine(points[2], points[3], points[4], points[5])) 
+			swapPoints(0, 1, 2, 3);
+		if (l3.intersectsLine(points[4], points[5], points[6], points[7])) 
+			swapPoints(2, 3, 4, 5);
+		if (!isClockwise()) 
+			swapPoints(2,3,6,7);
+	}
+
+	public static void main(String[] args) {
+
+		float[] f = { 0, 1, 2, 3, 4, 5, 6, 7 };
+		shiftArray(f, 3);
+		for (int i = 0; i < f.length; i++) {
+			System.out.print(f[i] + ",");
+		}
+		System.out.println();
+	}
+
+	public int upperLeftIndex() {
+
+		int ulIdx = -1;
+		float[] c = centroid();
+
+		for (int i = 0; i < points.length; i+=2) {
+			float cx = c[0] - points[i];
+			float cy = c[1] - points[i+1];
+			if (cx > 0 && cy > 0)
+				ulIdx = i;
+		}
+
+		if (ulIdx < 0) throw new RuntimeException("invalid state");
+
+		return ulIdx;
+	}
+
+	static void shiftArray(float[] f, int places) {
+
+		for (int j = 0; j < places; j++) {
+
+			float tmp = f[0];
+			for (int i = 1; i < f.length; i++) {
+				f[i - 1] = f[i];
+			}
+			f[f.length - 1] = tmp;
+		}
+	}
+
+	void swapPoints(int x1, int y1, int x2, int y2) {
+
+		float tmp = points[x1];
+		points[x1] = points[x2];
+		points[x2] = tmp;
+		tmp = points[y1];
+		points[y1] = points[y2];
+		points[y2] = tmp;
+	}
+
 	public Quad draw() {
 
-		if (this.warped != null)
-			parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
+		if (this.warped != null) parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
 
 		parent.noFill();
+		parent.fill(0,200,0);
+		if (!isClockwise())
+			parent.fill(200,0,0);
 		parent.stroke(0);
 		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
+		parent.stroke(100);
+		// parent.rect(bounds[0], bounds[1], bounds[2], bounds[3]);
+		for (int i = 0; i < points.length; i += 2) {
+			parent.text(i + "," + (i + 1), points[i], points[i + 1]);
+		}
 
 		return this;
 	}
@@ -133,6 +224,7 @@ public class Quad {
 				fpts[i] = Float.parseFloat(spts[i]);
 			}
 			quads.add(new Quad(p, fpts));
+			if (testOne) break;
 		}
 
 		return quads;
@@ -143,8 +235,7 @@ public class Quad {
 	public float area() {
 
 		float area = 0;
-		float[] x = { points[0], points[2], points[4], points[6] },
-				y = { points[1], points[3], points[5], points[7] };
+		float[] x = { points[0], points[2], points[4], points[6] }, y = { points[1], points[3], points[5], points[7] };
 
 		int j = 3;
 		for (int i = 0; i < 4; i++) {
@@ -152,5 +243,12 @@ public class Quad {
 			j = i;
 		}
 		return Math.abs(area / 2f);
+	}
+
+	public void offset(float x, float y) {
+
+		for (int i = 0; i < points.length; i++)
+			points[i] += (i % 2 == 0 ? x : y);
+		bounds = bounds();
 	}
 }
