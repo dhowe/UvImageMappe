@@ -9,7 +9,7 @@ public class UvMapper extends PApplet {
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/data.txt";
+	public static String DATA_FILE = "data/female_uv_test.txt";
 
 	public static boolean ROUNT_DATA_TO_INTS = true;
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
@@ -19,7 +19,7 @@ public class UvMapper extends PApplet {
 
 	public void settings() {
 
-		size(800, 700);
+		size(this.displayHeight, this.displayHeight);
 	}
 
 	public void setup() {
@@ -32,16 +32,32 @@ public class UvMapper extends PApplet {
 				ads.add(new UvImage(this, files[i]));
 		}
 
-		// Loop over quads, assigning best fitting ad-image (TODO)
+		// Loop over quads, assigning best fitting ad-image
 		for (Quad q : Quad.fromData(this, DATA_FILE)) {
-			for (UvImage img : ads) {
-				if (!img.used) {
-					
-					q.image(img); // scale/warp image
-					img.used = true;
-					break;
+
+			float distance = Math.abs(10 - q.aspectRatio());
+			int idx = 0;
+			System.out.println("Q:" + q.aspectRatio());
+
+			for (int i = 0; i < ads.size(); i++) {
+				UvImage img = ads.get(i);
+				// System.out.println("I" + i + ": " + img.aspectRation());
+				float cdistance = Math.abs(img.aspectRation() - q.aspectRatio());
+				// System.out.println(i + " " + cdistance + " " + distance);
+				if (cdistance <= distance) {
+					if (!img.used) {
+						idx = i;
+						distance = cdistance;
+					}
+					else {
+						System.out.println("Used: " + ads.get(i).imageIn);
+					}
 				}
 			}
+
+			q.image(ads.get(idx));
+			ads.get(idx).used = true;
+			System.out.println("Image: " + ads.get(idx).imageIn);
 			q.draw();
 		}
 	}
