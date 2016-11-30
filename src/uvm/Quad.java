@@ -69,6 +69,7 @@ public class Quad {
 
 		// resize the image before transform: width/ height specifically given,
 		// original aspect ratio ignored
+		
 		String s = UvMapper.CONVERT_CMD + bounds[2] + "x" + bounds[3] + "! " + image.imageIn + UvMapper.CONVERT_ARGS;
 
 		for (int i = 0; i < srcDst.length; i++) {
@@ -209,7 +210,8 @@ public class Quad {
 			return executor.execute(CommandLine.parse(line));
 		}
 		catch (Exception e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			return 0;
 		}
 	}
 
