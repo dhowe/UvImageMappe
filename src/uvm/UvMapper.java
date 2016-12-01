@@ -8,18 +8,19 @@ public class UvMapper extends PApplet {
 
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	public static int MAX_NUM_QUADS_TO_LOAD = 10000, NUM_QUADS_TO_PROCESS = 10000; 
-	public static int MAX_USAGES_PER_IMG = 1, MAX_NUM_IMGS_TO_LOAD = 10000, MIN_ALLOWED_IMG_AREA = 200;
+	public static int MAX_USAGES_PER_IMG = 4, MAX_NUM_IMGS_TO_LOAD = 10000, MIN_ALLOWED_IMG_AREA = 10;
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/noTriangle.txt";
+	public static String DATA_FILE = "data/updateUV.txt";
+	public static String UVNAME = "uv.png";
 
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
 
 	public void settings() {
 
-		size(1000,1000);
+		size(15000,15000);
 	}
 
 	public void setup() {
@@ -32,6 +33,8 @@ public class UvMapper extends PApplet {
 		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 
 		Quad.drawAll(quads);
+		save(UVNAME);
+			System.out.println("Wrote " + UVNAME);
 	}
 
 	// Loop over Quads assigning best fiting ad image to each
