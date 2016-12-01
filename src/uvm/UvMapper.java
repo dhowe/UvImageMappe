@@ -67,7 +67,7 @@ public class UvMapper extends PApplet {
 				}
 				
 				quad.image(bestImg);
-				if (quad.id==230) System.out.println("230: "+quad);
+								
 				processed++;
 				if (processed >= NUM_QUADS_TO_PROCESS)
 					break;
