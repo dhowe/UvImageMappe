@@ -9,16 +9,16 @@ public class UvMapper extends PApplet {
 
 	public static boolean CROP_IMGS_TO_QUADS = false;
 	public static boolean STROKE_QUAD_OUTLINES = false;
-	public static boolean SCALE_QUADS_TO_DISPLAY = false;
+	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	
-	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = false;
+	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = true;
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 10000, MAX_NUM_IMGS_TO_LOAD = 10; 
-	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 100;
+	public static int MAX_NUM_QUADS_TO_LOAD = 10000, MAX_NUM_IMGS_TO_LOAD = 10000; 
+	public static int MAX_USAGES_PER_IMG = 3, MIN_ALLOWED_IMG_AREA = 100;
 
-	public static String DATA_FILE = "data/data.txt";
+	public static String DATA_FILE = "data/noTriangle.txt";
 	public static String UV_NAME = "MaleTextureTesting1.png";
 	public static String IMAGE_DIR = "data/", OUTPUT_DIR = "warp/";
 	
@@ -27,7 +27,7 @@ public class UvMapper extends PApplet {
 
 	public void settings() {
 
-		size(800, 800);
+		size(10000, 10000);
 	}
 
 	public void setup() {
@@ -82,7 +82,9 @@ public class UvMapper extends PApplet {
 	}
 	
 	public static void showProgress(int x) {
-		if (SHOW_PROGRESS_DOTS) { 
+		
+		if (SHOW_PROGRESS_DOTS) {
+			
 			System.out.print(".");
 			if (x % 80 == 79)
 				System.out.println();
