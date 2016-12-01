@@ -93,19 +93,38 @@ public class Quad {
 		srcDst[4] = srcDst[8] = bounds[2];
 		srcDst[9] = srcDst[13] = bounds[3];
 
+
+			
 		// resize the image before transform: width/ height specifically given,
 		// original aspect ratio ignored
 		
-		String s = UvMapper.CONVERT_CMD + bounds[2] + "x" + bounds[3] + "! " 
-				+ UvMapper.IMAGE_DIR + image.imageIn + UvMapper.CONVERT_ARGS;
-
+		String s = UvMapper.CONVERT_CMD;
+    
+		//change the image point to crop
+		double change = 1/image.aspectRation() - aspectRatio();
+		System.out.println( aspectRatio() +" " + image.aspectRation() + " " + change);
+		if (image.aspectRation() > 1 && image.aspectRation() - aspectRatio() > 1) {
+			//too wide
+			float newW = image.height * (aspectRatio() + 1);
+			s += "-crop " + newW + "x" + image.height + "+0+0 ";
+			System.out.println("CROP to (width)" + newW + "x" + image.height);
+		}
+		else if (image.aspectRation() < 1 && 1/image.aspectRation() - aspectRatio() > 1) {
+			//too long
+			float newH = (float) (image.width / (aspectRatio() - 0.1));
+			s += "-crop " + image.width + "x" + newH + "+0+0 ";
+			System.out.println("CROP to (height)" + image.width + "x" + newH);
+		}
+	
+	s += "-resize " + bounds[2] + "x" + bounds[3] + "! " + UvMapper.IMAGE_DIR + image.imageIn + UvMapper.CONVERT_ARGS;
+	
 		for (int i = 0; i < srcDst.length; i++) {
 			s += srcDst[i];
 			if (i < srcDst.length - 1) s += ",";
 		}
 
 		String cmd = s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.imageOut;
-		//System.out.println(cmd);
+//		System.out.println(cmd);
 		return cmd;
 	}
 
@@ -231,8 +250,8 @@ public class Quad {
 		parent.stroke(0);
 		parent.noFill();
 		//if (this.warped != null)  parent.fill(200,0,0,32);
-		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
-		
+//		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
+//		
 		if (false && this.warped != null) {
 			parent.fill(255);
 			float[] ct = centroid();
@@ -255,7 +274,7 @@ public class Quad {
 			return 1;
 		}
 	}
-
+	
 	public static List<Quad> fromData(PApplet p, String dataFilePath) {
 		return fromData(p, dataFilePath, Integer.MAX_VALUE);
 	}
@@ -280,10 +299,12 @@ public class Quad {
 				
 				fpts[i] = Float.parseFloat(spts[i]);
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
-					fpts[i] *= (i % 2 == 0 ? p.width : p.height);		
+					fpts[i] *= (i % 2 == 0 ? p.width : p.height);	
+				
 				// the UV co-ordinate in MayaUV starts from bottom left corner
 				// y = p.height - y
-				if (i % 2 == 1) fpts[i] = p.height - fpts[i];
+				if (i % 2 == 1 && UvMapper.CHANGE_ORIGIN_TO_BOTTOM_LEFT) fpts[i] = p.height - fpts[i];
+
 			}
 
 			quads.add(new Quad(p, fpts));
