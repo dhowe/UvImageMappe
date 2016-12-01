@@ -14,7 +14,7 @@ public class Quad {
 
 	public PImage warped;
 	public PApplet parent;
-	public int id;
+	public int id, tries = 0;
 	
 	static int idx = 0;
 	
@@ -27,20 +27,26 @@ public class Quad {
 		this.bounds = bounds();
 	}
 
-	public Quad image(UvImage image) {
+	public boolean image(UvImage image) {
 
 		this.image = image;
 		this.image.usedCount++;
 
 		String cmd = toConvertCommand();
-		if (exec(cmd) != 0) 
-			throw new RuntimeException("Warp failed on: " + this);
+		if (exec(cmd) == 0) { 
+			
+			warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.imageOut);
+		}
+		else {
+			System.err.println("Warp failed on: " + this);
+		}
 		
-		warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.imageOut);
-		if (warped == null) 
-			System.err.println("[WARN] Unable to load image: " +
-					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $"+cmd);
-		return this;
+		if (warped == null) {
+			System.err.println("[WARN] Unable to load warped image: " +
+					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $ "+cmd);
+		}
+		
+		return (warped != null);
 	}
 	
 	public String toString() {
@@ -231,7 +237,6 @@ public class Quad {
 			parent.fill(255);
 			float[] ct = centroid();
 			parent.text(id , ct[0], ct[1]); 
-
 			for (int i = 0; i < points.length; i += 2)
 				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 		}
@@ -247,8 +252,7 @@ public class Quad {
 			return executor.execute(CommandLine.parse(line));
 		}
 		catch (Exception e) {
-//			throw new RuntimeException(e);
-			return 0;
+			return 1;
 		}
 	}
 
@@ -292,7 +296,7 @@ public class Quad {
 		// Constrain to our maximum number post-sort
 		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
 		
-		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\n");
+		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\nAssigning images:");
 		
 		return quads;
 	}
