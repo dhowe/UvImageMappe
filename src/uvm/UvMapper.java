@@ -14,6 +14,7 @@ public class UvMapper extends PApplet {
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
 	public static String DATA_FILE = "data/noTriangle.txt";
+	public static String UVNAME = "uv.png";
 
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
@@ -33,6 +34,9 @@ public class UvMapper extends PApplet {
 		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 
 		Quad.drawAll(quads);
+		
+//		save(UVNAME);
+//		System.out.println("Wrote " + UVNAME);
 	}
 
 	// Loop over Quads assigning best fiting ad image to each

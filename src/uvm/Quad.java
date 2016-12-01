@@ -280,7 +280,10 @@ public class Quad {
 				
 				fpts[i] = Float.parseFloat(spts[i]);
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
-					fpts[i] *= (i % 2 == 0 ? p.width : p.height);				
+					fpts[i] *= (i % 2 == 0 ? p.width : p.height);		
+				// the UV co-ordinate in MayaUV starts from bottom left corner
+				// y = p.height - y
+				if (i % 2 == 1) fpts[i] = p.height - fpts[i];
 			}
 
 			quads.add(new Quad(p, fpts));
