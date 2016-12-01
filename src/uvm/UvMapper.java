@@ -7,22 +7,23 @@ import processing.core.PApplet;
 
 public class UvMapper extends PApplet {
 
-	public static boolean SCALE_QUADS_TO_DISPLAY = true;
+	public static boolean SCALE_QUADS_TO_DISPLAY = false;
+	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = false;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 10000, MAX_USAGES_PER_IMG = 1400;
-	public static int MAX_NUM_IMGS_TO_LOAD = 40000, MIN_ALLOWED_IMG_AREA = 50;
+	public static int MAX_NUM_QUADS_TO_LOAD = 4, MAX_USAGES_PER_IMG = 2;
+	public static int MAX_NUM_IMGS_TO_LOAD = 3, MIN_ALLOWED_IMG_AREA = 100;
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/male_uv_2.txt";
-	public static String UVNAME = "MaleUv2.png";
+	public static String DATA_FILE = "data/data.txt";
+	public static String UVNAME = "MaleTextureTesting1.png";
 
-	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
+	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
 
 	public void settings() {
 
-		size(5000,5000);
+		size(800,800);
 	}
 
 	public void setup() {
