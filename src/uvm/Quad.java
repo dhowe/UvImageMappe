@@ -16,7 +16,6 @@ public class Quad {
 	protected PApplet parent;
 	protected int id;
 	
-	static boolean testOnlyOne = false;
 	static int idx = 0;
 	
 	public Quad(PApplet p, float... points) {
@@ -38,13 +37,25 @@ public class Quad {
 		//System.out.println(cmd);
 		if (exec(cmd) != 0) 
 			throw new RuntimeException("Warp failed on: " + this);
+		
 		warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.imageOut);
 		if (warped == null) 
 			System.err.println("[WARN] Unable to load image: " +
 					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $"+cmd);
-		else
-		  System.out.println("Quad#"+id + ": "+image.imageOut+ "  area="+area());			
+		//else System.out.println("Quad#"+id + ": "+image.imageOut+ "  area="+area());			
+
+		//System.out.println(this);
+		
 		return this;
+	}
+	
+	public String toString() {
+		String s = "Quad#" + id + ": "; 
+		for (int i = 0; i < points.length; i++) {
+			s += points[i]/1000f;
+			if (i < points.length-1) s += ","; 
+		}
+		return s;
 	}
 	
 	public boolean isClockwise() {
@@ -84,7 +95,7 @@ public class Quad {
 				+ UvMapper.IMAGE_DIR + image.imageIn + UvMapper.CONVERT_ARGS;
 
 		for (int i = 0; i < srcDst.length; i++) {
-			s += UvMapper.ROUNT_DATA_TO_INTS ? "" + Math.round(srcDst[i]) : srcDst[i];
+			s += srcDst[i];
 			if (i < srcDst.length - 1) s += ",";
 		}
 
@@ -134,14 +145,21 @@ public class Quad {
 	}
 
 	public void fixOrdering() {
+		
 		Line2D.Float l1 = new Line2D.Float(points[0], points[1], points[6], points[7]);
 		Line2D.Float l3 = new Line2D.Float(points[0], points[1], points[2], points[3]);
-		if (l1.intersectsLine(points[2], points[3], points[4], points[5])) 
+		if (l1.intersectsLine(points[2], points[3], points[4], points[5])) {
 			swapPoints(0, 1, 2, 3);
-		if (l3.intersectsLine(points[4], points[5], points[6], points[7])) 
+			//System.out.println("SWAP1");
+		}
+		if (l3.intersectsLine(points[4], points[5], points[6], points[7])) { 
 			swapPoints(2, 3, 4, 5);
-		if (!isClockwise()) 
+			//System.out.println("SWAP2");
+		}
+		if (!isClockwise()) { 
 			swapPoints(2,3,6,7);
+			//System.out.println("SWAP3");
+		}
 	}
 
 	public static void main(String[] args) {
@@ -205,10 +223,17 @@ public class Quad {
 		
 		parent.stroke(0);
 		parent.noFill();
+		//if (this.warped != null)  parent.fill(200,0,0,32);
 		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
 		
-		//for (int i = 0; i < points.length; i += 2)
-			//parent.text(i + "," + (i + 1), points[i], points[i + 1]);
+		if (false && this.warped != null) {
+			parent.fill(255);
+			float[] ct = centroid();
+			parent.text(id , ct[0], ct[1]); 
+
+			for (int i = 0; i < points.length; i += 2)
+				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
+		}
 
 		return this;
 	}
@@ -222,43 +247,48 @@ public class Quad {
 		}
 		catch (Exception e) {
 //			throw new RuntimeException(e);
-			return 1;
+			return 0;
 		}
 	}
 
-	public static ArrayList<Quad> fromData(PApplet p, String dataFilePath) {
+	public static List<Quad> fromData(PApplet p, String dataFilePath) {
 		return fromData(p, dataFilePath, Integer.MAX_VALUE);
 	}
 	
-	public static ArrayList<Quad> fromData(PApplet p, String dataFilePath, int maxToLoad) {
+	public static List<Quad> fromData(PApplet p, String dataFilePath, int maxToLoad) {
 
-		ArrayList<Quad> quads = new ArrayList<Quad>();
-		for (String line : p.loadStrings(dataFilePath)) {
+		List<Quad> quads = new ArrayList<Quad>();
+		String[] lines = p.loadStrings(dataFilePath);
+		for (String line : lines) {
 
 			String[] spts = line.split(",");
 			if (spts.length != 8) {
 				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
 				continue;
 			}
+			
 			float[] fpts = new float[spts.length];
 			for (int i = 0; i < spts.length; i++) {
+				
 				fpts[i] = Float.parseFloat(spts[i]);
+				
+				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
+					fpts[i] *= (i % 2 == 0 ? p.width : p.height);
 			}
 			
 			quads.add(new Quad(p, fpts));
-			if (testOnlyOne) break;
 		}
 		
-		// Scale the Quads (by sketch size) and ignore tiny ones
 		int removed = 0;
+		/*Scale the Quads (by sketch size) and ignore tiny ones
 		for (Iterator<Quad> it = quads.iterator(); it.hasNext();) {
 			Quad quad = it.next();
-			quad.scale(p.width, p.height);
+			if (UvMapper.SCALE_QUADS_TO_DISPLAY) quad.scale(p.width, p.height);
 			if (quad.area() < UvMapper.MIN_ALLOWED_QUAD_AREA ) {
 				it.remove();
 				removed++;
 			}
-		}
+		}*/
 		
 		// Sort the Quads by area
 		quads.sort(new Comparator<Quad>() {
@@ -266,14 +296,16 @@ public class Quad {
 				return q1.area() > q2.area() ? -1 : 1;
 			}
 		});
+
+		// Constrain to our maximum number post-sort
+		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
 		
-		System.out.println("\nFound " + quads.size()+" Quads (after removing " +
-			removed + " too small) with max-area=" + quads.get(0).area()+"\n");
+		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\n");
 		
 		return quads;
 	}
 
-	public static void drawAll(ArrayList<Quad> quads) {
+	public static void drawAll(List<Quad> quads) {
 
 		for (Quad q : quads) {
 			q.draw();

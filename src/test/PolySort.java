@@ -20,9 +20,8 @@ public class PolySort extends PApplet {
 	public void setup() {
 
 		int i = 0;
-		ArrayList<Quad> quads = Quad.fromData(this, "polys.txt");
+		List<Quad> quads = Quad.fromData(this, "polys.txt");
 		for (Quad quad : quads) {
-			//sortPoints(quad.points);
 			quad.offset(100+50*i,50+50*i++);
 			quad.draw();
 		}

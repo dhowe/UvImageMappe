@@ -45,10 +45,10 @@ public class UvImage {
 	}
 	
 	public static ArrayList<UvImage> loadFolder(PApplet p, String dir) {
-		return loadFolder(p, dir, Integer.MAX_VALUE);
+		return fromFolder(p, dir, Integer.MAX_VALUE);
 	}
 	
-	public static ArrayList<UvImage> loadFolder(PApplet p, String dir, int maxNum) {
+	public static ArrayList<UvImage> fromFolder(PApplet p, String dir, int maxNum) {
 
 		// Load images into UvImage objects
 		String[] files = new File(dir).list();
