@@ -1,6 +1,7 @@
 package uvm;
 
 import java.util.*;
+import java.text.SimpleDateFormat; 
 
 import processing.core.PApplet;
 
@@ -8,20 +9,20 @@ public class UvMapper extends PApplet {
 
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 20000, MAX_USAGES_PER_IMG = 3;
-	public static int MAX_NUM_IMGS_TO_LOAD = 40000, MIN_ALLOWED_IMG_AREA = 200;
+	public static int MAX_NUM_QUADS_TO_LOAD = 10000, MAX_USAGES_PER_IMG = 1400;
+	public static int MAX_NUM_IMGS_TO_LOAD = 40000, MIN_ALLOWED_IMG_AREA = 50;
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";
-	public static String DATA_FILE = "data/noTriangle.txt";
-	public static String UVNAME = "uv.png";
+	public static String DATA_FILE = "data/male_uv_2.txt";
+	public static String UVNAME = "MaleUv2.png";
 
 	public static String CONVERT_CMD = "/usr/local/bin/convert -resize ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
 
 	public void settings() {
 
-		size(1000,1000);
+		size(5000,5000);
 	}
 
 	public void setup() {
@@ -35,7 +36,10 @@ public class UvMapper extends PApplet {
 
 		Quad.drawAll(quads);
 		
-//		save(UVNAME);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		String time  = dateFormat.format(new Date());
+		
+//		save(time + "_" + UVNAME);
 //		System.out.println("Wrote " + UVNAME);
 	}
 
