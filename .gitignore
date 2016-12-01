@@ -1,3 +1,7 @@
 /bin/
+data/*.jpg
+data/*.jpeg
+data/*.png
+data/*.gif
 **/warp/*
 **/DchDriver.java
