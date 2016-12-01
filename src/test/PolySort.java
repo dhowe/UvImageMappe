@@ -21,10 +21,11 @@ public class PolySort extends PApplet {
 	public void setup() {
 
 		int i = 0;
-		List<Quad> quads = Quad.fromData(this, "bug3.txt");
+		List<Quad> quads = Quad.fromData(this, "bug.txt");
 		for (Quad quad : quads) {
 			int idx = 0;
 			quad.draw();
+			noFill();
 			stroke(200,0,0);
 			//ellipse(quad.points[idx],quad.points[idx+1],10,10);
 			ellipse(quad.points[idx],quad.points[idx+1],10,10);
@@ -34,6 +35,8 @@ public class PolySort extends PApplet {
 	public static void main(String[] args) {
 
 		UvMapper.SCALE_QUADS_TO_DISPLAY = false;
+		UvMapper.STROKE_QUAD_OUTLINES = true;
+		UvMapper.DRAW_QUAD_DEBUG_DATA = true;
 		PApplet.main(PolySort.class.getName());
 	}
 }

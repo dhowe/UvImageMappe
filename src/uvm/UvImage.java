@@ -10,16 +10,17 @@ public class UvImage {
 	public PImage image;
 	public int quadId = -1;
 	public int width, height;
-	public String imageIn, imageOut;
-	public int usedCount = 0;
+	public String imageName, warpName;
+	public ArrayList<Float> appliedAreas;
 
 	public UvImage(PImage image, String imageName) {
 		
-		this.image = image;//p.loadImage(imageName);
+		this.image = image;
+		this.imageName = imageName;
 		this.width = this.image.width;
 		this.height = this.image.height;
-		this.imageIn = imageName;
-		this.imageOut = changeExt(imageName, ".png");
+		this.appliedAreas = new ArrayList<Float>();
+		this.warpName = changeExt(imageName, ".png");
 	}
 
 	public String changeExt(String fileName, String ext) {
@@ -35,7 +36,7 @@ public class UvImage {
 
 	public String toString() {
 
-		return "{ name: " + imageIn + ", width: " + width + ", height: " 
+		return "{ name: " + imageName + ", width: " + width + ", height: " 
 				+ height + (quadId > -1 ? (", quad: " + quadId) : " ") + "}";
 	}
 
@@ -58,6 +59,7 @@ public class UvImage {
 		ArrayList<UvImage> ads = new ArrayList<UvImage>();
 
 		for (int i = 0; i < files.length; i++) {
+			
 			if (files[i].matches(".*\\.(png|gif|jpg|jpeg)")) {
 				
 				//System.out.println("Trying "+dir+"/"+files[i]);
@@ -69,9 +71,8 @@ public class UvImage {
 					continue;
 				}
 				ads.add(new UvImage(pimg, files[i]));
-				System.out.print(".");
-				if (ads.size() % 80 == 79) 
-					System.out.println();
+				
+				UvMapper.showProgress(ads.size());
 			}
 			if (ads.size() >= maxNum)
 				break;
@@ -79,16 +80,32 @@ public class UvImage {
 
 	  // sort the images by area
 		ads.sort(new Comparator<UvImage>() {
+
 			public int compare(UvImage img1, UvImage img2) {
-				if( img1.area() > img2.area()) return -1;
-				else if(img1.area() == img2.area()) return 0;
-				else return 1;
-//				return img1.area() >= img2.area() ? -1 : 1;
+				
+				if (img1.area() > img2.area())
+					return -1;
+				else if (img1.area() == img2.area())
+					return 0;
+				else
+					return 1;
 			}
 		});
 		
 		System.out.println("\nLoaded "+ads.size()+" images");
 		
 		return ads;
+	}
+
+	// True iff we have more applications remaining 
+	// and we haven't accepted a quad with this area before
+	public boolean acceptsQuad(Quad quad) {
+		
+		if (appliedAreas.size() >= UvMapper.MAX_USAGES_PER_IMG)
+			return false;
+		
+		boolean accepted = !appliedAreas.contains(quad.area());
+		//if (!accepted) System.out.println("Quad#"+quad.id+" rejected for "+imageIn);
+		return accepted;
 	}
 }

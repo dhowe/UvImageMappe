@@ -1,6 +1,7 @@
-package uvm;
+package test;
 
 import processing.core.PApplet;
+import uvm.Quad;
 
 public class OneQuad extends PApplet {
 

@@ -27,15 +27,18 @@ public class Quad {
 		this.bounds = bounds();
 	}
 
-	public boolean image(UvImage image) {
+	/**
+	 * Returns true if image was successfully warped, then loaded, otherwise false
+	 */
+	public boolean assignImage(UvImage image) {
 
 		this.image = image;
-		this.image.usedCount++;
+		this.image.appliedAreas.add(area());
 
 		String cmd = toConvertCommand();
 		if (exec(cmd) == 0) { 
 			
-			warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.imageOut);
+			warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.warpName);
 		}
 		else {
 			System.err.println("Warp failed on: " + this);
@@ -43,7 +46,7 @@ public class Quad {
 		
 		if (warped == null) {
 			System.err.println("[WARN] Unable to load warped image: " +
-					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $ "+cmd);
+					UvMapper.OUTPUT_DIR + image.warpName + "\n  $ "+cmd);
 		}
 		
 		return (warped != null);
@@ -93,38 +96,43 @@ public class Quad {
 		srcDst[4] = srcDst[8] = bounds[2];
 		srcDst[9] = srcDst[13] = bounds[3];
 
-
-			
 		// resize the image before transform: width/ height specifically given,
 		// original aspect ratio ignored
 		
 		String s = UvMapper.CONVERT_CMD;
-    
-		//change the image point to crop
-		double change = 1/image.aspectRation() - aspectRatio();
-		System.out.println( aspectRatio() +" " + image.aspectRation() + " " + change);
-		if (image.aspectRation() > 1 && image.aspectRation() - aspectRatio() > 1) {
-			//too wide
-			float newW = image.height * (aspectRatio() + 1);
-			s += "-crop " + newW + "x" + image.height + "+0+0 ";
-			System.out.println("CROP to (width)" + newW + "x" + image.height);
-		}
-		else if (image.aspectRation() < 1 && 1/image.aspectRation() - aspectRatio() > 1) {
-			//too long
-			float newH = (float) (image.width / (aspectRatio() - 0.1));
-			s += "-crop " + image.width + "x" + newH + "+0+0 ";
-			System.out.println("CROP to (height)" + image.width + "x" + newH);
+		
+		if (UvMapper.CROP_IMGS_TO_QUADS) {
+	    
+			// change the image point to crop
+			double change = 1/image.aspectRation() - aspectRatio(); // not used ??
+			
+			// System.out.println( aspectRatio() +" " + image.aspectRation() + " " + change);
+			if (image.aspectRation() > 1 && (image.aspectRation() - aspectRatio()) > 1) {
+				
+				// too wide so crop
+				float newW = image.height * (aspectRatio() + 1);
+				s += "-crop " + newW + "x" + image.height + "+0+0 ";
+				//System.out.println("CROP to (width)" + newW + "x" + image.height);
+			}
+			else if (image.aspectRation() < 1 && (1/image.aspectRation() - aspectRatio()) > 1) {
+				
+				// too long, so crop
+				float newH = (float) (image.width / (aspectRatio() - 0.1));  // - 0.1 ?
+				s += "-crop " + image.width + "x" + newH + "+0+0 ";
+				//System.out.println("CROP to (height)" + image.width + "x" + newH);
+			}
 		}
 	
-	s += "-resize " + bounds[2] + "x" + bounds[3] + "! " + UvMapper.IMAGE_DIR + image.imageIn + UvMapper.CONVERT_ARGS;
+		s += "-resize " + bounds[2] + "x" + bounds[3] + "! " + UvMapper.IMAGE_DIR + image.imageName + UvMapper.CONVERT_ARGS;
 	
 		for (int i = 0; i < srcDst.length; i++) {
 			s += srcDst[i];
 			if (i < srcDst.length - 1) s += ",";
 		}
 
-		String cmd = s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.imageOut;
-//		System.out.println(cmd);
+		String cmd = s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.warpName;
+		// System.out.println(cmd);
+		
 		return cmd;
 	}
 
@@ -239,7 +247,6 @@ public class Quad {
 
 	public Quad draw() {
 
-		
 //		parent.fill(0,200,0);
 //		if (!isClockwise())
 //			parent.fill(200,0,0);
@@ -247,15 +254,21 @@ public class Quad {
 		if (this.warped != null) 
 			parent.image(this.warped, bounds[0], bounds[1], bounds[2], bounds[3]);
 		
-		parent.stroke(0);
 		parent.noFill();
-		//if (this.warped != null)  parent.fill(200,0,0,32);
-//		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
-//		
-		if (false && this.warped != null) {
+		parent.noStroke();
+		
+		if (UvMapper.STROKE_QUAD_OUTLINES) {
+			parent.stroke(0);
+			//if (this.warped != null)  parent.fill(200,0,0,32);
+			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
+		}
+
+		if (UvMapper.DRAW_QUAD_DEBUG_DATA) {
 			parent.fill(255);
 			float[] ct = centroid();
-			parent.text(id , ct[0], ct[1]); 
+			parent.textSize(18);
+			parent.text(id , ct[0], ct[1]); // id 
+			parent.textSize(12);
 			for (int i = 0; i < points.length; i += 2)
 				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 		}
