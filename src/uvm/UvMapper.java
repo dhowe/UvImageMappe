@@ -7,8 +7,8 @@ import processing.core.PApplet;
 public class UvMapper extends PApplet {
 
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
-	public static int MAX_NUM_QUADS_TO_LOAD = 10000, NUM_QUADS_TO_PROCESS = 10000; 
-	public static int MAX_USAGES_PER_IMG = 1, MAX_NUM_IMGS_TO_LOAD = 10000, MIN_ALLOWED_IMG_AREA = 200;
+	public static int MAX_NUM_QUADS_TO_LOAD = 50, NUM_QUADS_TO_PROCESS = 10000; 
+	public static int MAX_USAGES_PER_IMG = 1, MAX_NUM_IMGS_TO_LOAD = 100, MIN_ALLOWED_IMG_AREA = 200;
 
 	public static String IMAGE_DIR = "data/";
 	public static String OUTPUT_DIR = "warp/";

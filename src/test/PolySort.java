@@ -4,7 +4,7 @@ import java.awt.geom.Line2D;
 import java.util.*;
 
 import processing.core.PApplet;
-import uvm.Quad;
+import uvm.*;
 
 public class PolySort extends PApplet {
 
@@ -14,21 +14,29 @@ public class PolySort extends PApplet {
 	}
 
 	void dline(Line2D.Float l) {
-		line(l.x1,l.y1,l.x2,l.y2);
+
+		line(l.x1, l.y1, l.x2, l.y2);
 	}
-	
+
 	public void setup() {
 
 		int i = 0;
-		List<Quad> quads = Quad.fromData(this, "polys.txt");
+		List<Quad> quads = Quad.fromData(this, "reorder.txt");
 		for (Quad quad : quads) {
-			quad.offset(100+50*i,50+50*i++);
+			//int idx = quad.findUpperLeft();
+			//System.out.println(quad.id + ": ul=" + idx + "," + (idx + 1));
+			//quad.fixUpperLeft();
+			int idx = 0;
 			quad.draw();
+			stroke(200,0,0);
+			//ellipse(quad.points[idx],quad.points[idx+1],10,10);
+			ellipse(quad.points[idx],quad.points[idx+1],10,10);
 		}
 	}
 
 	public static void main(String[] args) {
 
+		UvMapper.SCALE_QUADS_TO_DISPLAY = false;
 		PApplet.main(PolySort.class.getName());
 	}
 }

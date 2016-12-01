@@ -12,9 +12,9 @@ public class Quad {
 	public UvImage image;
 	public float[] points, bounds;
 
-	protected PImage warped;
-	protected PApplet parent;
-	protected int id;
+	public PImage warped;
+	public PApplet parent;
+	public int id;
 	
 	static int idx = 0;
 	
@@ -25,6 +25,7 @@ public class Quad {
 		this.parent = p;
 		this.points = points;
 		fixOrdering();
+		fixUpperLeft();
 		this.bounds = bounds();
 	}
 	
@@ -235,6 +236,12 @@ public class Quad {
 				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 		}
 
+		float[] ct = centroid();
+		parent.text(id , ct[0], ct[1]); 
+
+		for (int i = 0; i < points.length; i += 2)
+			parent.text(i + "," + (i + 1), points[i], points[i + 1]);
+		
 		return this;
 	}
 
@@ -278,17 +285,6 @@ public class Quad {
 			
 			quads.add(new Quad(p, fpts));
 		}
-		
-		int removed = 0;
-		/*Scale the Quads (by sketch size) and ignore tiny ones
-		for (Iterator<Quad> it = quads.iterator(); it.hasNext();) {
-			Quad quad = it.next();
-			if (UvMapper.SCALE_QUADS_TO_DISPLAY) quad.scale(p.width, p.height);
-			if (quad.area() < UvMapper.MIN_ALLOWED_QUAD_AREA ) {
-				it.remove();
-				removed++;
-			}
-		}*/
 		
 		// Sort the Quads by area
 		quads.sort(new Comparator<Quad>() {
@@ -339,4 +335,109 @@ public class Quad {
 		bounds = bounds();
 	}
 	
+	public boolean fixUpperLeft() {
+
+		int ul = findUpperLeft();
+		shiftArray(points, ul);
+		return ul != 0;
+	}
+	
+	/*
+	 * Create two sub-sets from the 4 vertices: 
+	 *   set A: the two vertices that have the smallest x-coordinates
+	 *   set B: get the two vertices that have the smallest y-coordinates
+	 *   
+	 * switch (cardinality of A ∩ B) {
+	 * 
+	 * 	case 1: (i.e. only one vertex exist in both set) set that vertex as the
+	 * 		upper-left corner
+	 * 
+	 * 	case 0 (i.e.empty set) and case 2 (i.e. A = B): either the vertex has the
+	 * 		smallest x-coordinate or the one has the smallest y-coordinate can be the
+	 * 		upper-left corner
+	 */
+	public int findUpperLeft() {
+
+		int minX = minXPos(-1);
+		int minX2 = minXPos( minX);
+		int[] setA = { minX , minX2 };
+		//System.out.println(id+": minX="+minX+" or "+minX2);
+		
+		int minY = minYPos(-1);
+		int minY2 = minYPos( minY);
+		int[] setB = { minY-1  , minY2-1 };
+		
+		//System.out.println(id+": minY="+minY+" or "+minY2);
+
+		int[] abIntersection = intersection(setA, setB);
+		
+		/*if (abIntersection.length > 0) {
+			System.out.print(id+"-intersection: ");
+			for (int i = 0; i < abIntersection.length; i++) {
+				System.out.print(abIntersection[i]+" ");
+			}
+		}*/
+		
+		if (abIntersection.length == 1) {
+			//System.out.println(id+" :: A");
+			return abIntersection[0];
+		}
+
+		//System.out.println(id+": minX="+minX+","+(minX+1)+"  minY="+minY+","+(minY+1));
+		//System.out.println(quad.id+" :: B "+abIntersection.length);
+		float mxd = PApplet.dist(0, 0, points[setA[0]], points[setA[1]]);
+		float myd = PApplet.dist(0, 0, points[setB[0]], points[setB[1]]);
+		//System.out.println(id+" :: B "+abIntersection.length + " xd: "+mxd+" yd="+myd);
+		return mxd < myd ? minX : minY;
+
+		//System.out.println(quad.id+": "+minX+" "+minX2);
+	}
+
+	public int[] intersection(int[] nums1, int[] nums2) {
+    HashSet<Integer> set1 = new HashSet<Integer>();
+    for(int i: nums1){
+        set1.add(i);
+    }
+    HashSet<Integer> set2 = new HashSet<Integer>();
+    for(int i: nums2){
+        if(set1.contains(i)){
+            set2.add(i);
+        }
+    }
+    int[] result = new int[set2.size()];
+    int i=0;
+    for(int n: set2){
+        result[i++] = n;
+    }
+    return result;
+	}
+
+	private int minYPos(int ignoreIdx) {
+		int minIdx = -1;
+		float minY = Float.MAX_VALUE;
+		for (int i = 0; i < points.length; i++) {
+			if (i % 2 == 1 && i != ignoreIdx) {
+				if (points[i] < minY) {
+					minY = points[i];
+					minIdx = i;
+				}
+			}
+		}
+		return minIdx;
+	}
+	
+	private int minXPos(int ignoreIdx) {
+		int minIdx = -1;
+		float minX = Float.MAX_VALUE;
+		for (int i = 0; i < points.length; i++) {
+			if (i % 2 == 0 && i != ignoreIdx) {
+				if (points[i] < minX) {
+					minX = points[i];
+					minIdx = i;
+				}
+			}
+		}
+		return minIdx;
+	}
+
 }
