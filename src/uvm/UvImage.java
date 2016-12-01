@@ -80,7 +80,10 @@ public class UvImage {
 	  // sort the images by area
 		ads.sort(new Comparator<UvImage>() {
 			public int compare(UvImage img1, UvImage img2) {
-				return img1.area() > img2.area() ? -1 : 1;
+				if( img1.area() > img2.area()) return -1;
+				else if(img1.area() == img2.area()) return 0;
+				else return 1;
+//				return img1.area() >= img2.area() ? -1 : 1;
 			}
 		});
 		

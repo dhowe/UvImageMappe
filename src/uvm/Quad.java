@@ -224,7 +224,7 @@ public class Quad {
 		parent.stroke(0);
 		parent.noFill();
 		//if (this.warped != null)  parent.fill(200,0,0,32);
-		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
+//		parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);		
 		
 		if (false && this.warped != null) {
 			parent.fill(255);
@@ -274,6 +274,11 @@ public class Quad {
 				
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
 					fpts[i] *= (i % 2 == 0 ? p.width : p.height);
+				
+				//the UV co-ordinate in MayaUV starts from bottom left corner
+				// y = p.height - y
+				if (i % 2 == 1) 
+					fpts[i] = p.height - fpts[i];
 			}
 			
 			quads.add(new Quad(p, fpts));
