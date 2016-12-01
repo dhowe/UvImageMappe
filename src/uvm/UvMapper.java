@@ -65,8 +65,9 @@ public class UvMapper extends PApplet {
 					System.err.println("[WARN] No image found for Quad#" + quad.id);
 					continue;
 				}
-
+				
 				quad.image(bestImg);
+				if (quad.id==230) System.out.println("230: "+quad);
 				processed++;
 				if (processed >= NUM_QUADS_TO_PROCESS)
 					break;

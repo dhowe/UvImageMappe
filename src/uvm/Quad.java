@@ -18,24 +18,21 @@ public class Quad {
 	
 	static int idx = 0;
 	
-	public Quad(PApplet p, float... points) {
-
+	public Quad(PApplet p, float[] points) {
+		
 		this.id = idx++;
-
 		this.parent = p;
 		this.points = points;
-		fixOrdering();
-		fixUpperLeft();
+		this.repairPoints();
 		this.bounds = bounds();
 	}
-	
+
 	public Quad image(UvImage image) {
 
 		this.image = image;
 		this.image.usedCount++;
 
 		String cmd = toConvertCommand();
-		//System.out.println(cmd);
 		if (exec(cmd) != 0) 
 			throw new RuntimeException("Warp failed on: " + this);
 		
@@ -43,20 +40,21 @@ public class Quad {
 		if (warped == null) 
 			System.err.println("[WARN] Unable to load image: " +
 					UvMapper.OUTPUT_DIR + image.imageOut + "\n  $"+cmd);
-		//else System.out.println("Quad#"+id + ": "+image.imageOut+ "  area="+area());			
-
-		//System.out.println(this);
-		
 		return this;
 	}
 	
 	public String toString() {
 		String s = "Quad#" + id + ": "; 
 		for (int i = 0; i < points.length; i++) {
-			s += points[i]/1000f;
+			s += points[i];
 			if (i < points.length-1) s += ","; 
 		}
 		return s;
+	}
+	
+	protected void repairPoints() {
+		fixOrdering();
+		fixUpperLeft();		
 	}
 	
 	public boolean isClockwise() {
@@ -100,7 +98,9 @@ public class Quad {
 			if (i < srcDst.length - 1) s += ",";
 		}
 
-		return s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.imageOut;
+		String cmd = s.trim() + ' ' + UvMapper.OUTPUT_DIR + image.imageOut;
+		//System.out.println(cmd);
+		return cmd;
 	}
 
 	private float[] normalizeQuadPosition() {
@@ -236,12 +236,6 @@ public class Quad {
 				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 		}
 
-		float[] ct = centroid();
-		parent.text(id , ct[0], ct[1]); 
-
-		for (int i = 0; i < points.length; i += 2)
-			parent.text(i + "," + (i + 1), points[i], points[i + 1]);
-		
 		return this;
 	}
 
@@ -268,21 +262,23 @@ public class Quad {
 		String[] lines = p.loadStrings(dataFilePath);
 		for (String line : lines) {
 
+			if (line.length() < 8 || line.startsWith("#"))
+				continue;
+			
 			String[] spts = line.split(",");
 			if (spts.length != 8) {
 				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
 				continue;
 			}
-			
+						
 			float[] fpts = new float[spts.length];
 			for (int i = 0; i < spts.length; i++) {
 				
 				fpts[i] = Float.parseFloat(spts[i]);
-				
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
-					fpts[i] *= (i % 2 == 0 ? p.width : p.height);
+					fpts[i] *= (i % 2 == 0 ? p.width : p.height);				
 			}
-			
+
 			quads.add(new Quad(p, fpts));
 		}
 		
@@ -366,31 +362,18 @@ public class Quad {
 		int minY = minYPos(-1);
 		int minY2 = minYPos( minY);
 		int[] setB = { minY-1  , minY2-1 };
-		
 		//System.out.println(id+": minY="+minY+" or "+minY2);
 
 		int[] abIntersection = intersection(setA, setB);
-		
-		/*if (abIntersection.length > 0) {
-			System.out.print(id+"-intersection: ");
-			for (int i = 0; i < abIntersection.length; i++) {
-				System.out.print(abIntersection[i]+" ");
-			}
-		}*/
-		
 		if (abIntersection.length == 1) {
-			//System.out.println(id+" :: A");
-			return abIntersection[0];
+				//System.out.println(id+" :: A");
+				return abIntersection[0];
 		}
 
-		//System.out.println(id+": minX="+minX+","+(minX+1)+"  minY="+minY+","+(minY+1));
-		//System.out.println(quad.id+" :: B "+abIntersection.length);
 		float mxd = PApplet.dist(0, 0, points[setA[0]], points[setA[1]]);
 		float myd = PApplet.dist(0, 0, points[setB[0]], points[setB[1]]);
 		//System.out.println(id+" :: B "+abIntersection.length + " xd: "+mxd+" yd="+myd);
-		return mxd < myd ? minX : minY;
-
-		//System.out.println(quad.id+": "+minX+" "+minX2);
+		return mxd < myd ? setA[0] : setB[0];
 	}
 
 	public int[] intersection(int[] nums1, int[] nums2) {

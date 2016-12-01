@@ -10,7 +10,7 @@ public class PolySort extends PApplet {
 
 	public void settings() {
 
-		size(1200, 1000);
+		size(1000,1000);
 	}
 
 	void dline(Line2D.Float l) {
@@ -21,11 +21,8 @@ public class PolySort extends PApplet {
 	public void setup() {
 
 		int i = 0;
-		List<Quad> quads = Quad.fromData(this, "reorder.txt");
+		List<Quad> quads = Quad.fromData(this, "bug3.txt");
 		for (Quad quad : quads) {
-			//int idx = quad.findUpperLeft();
-			//System.out.println(quad.id + ": ul=" + idx + "," + (idx + 1));
-			//quad.fixUpperLeft();
 			int idx = 0;
 			quad.draw();
 			stroke(200,0,0);
