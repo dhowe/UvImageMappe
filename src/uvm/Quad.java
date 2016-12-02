@@ -33,7 +33,7 @@ public class Quad {
 	public boolean assignImage(UvImage image) {
 
 		this.image = image;
-		this.image.appliedAreas.add(area());
+		this.image.appliedAreas.add((float) Math.round(area()));
 
 		String cmd = toConvertCommand();
 		if (exec(cmd) == 0) { 
@@ -464,4 +464,31 @@ public class Quad {
 		return minIdx;
 	}
 
+
+	public static void mouseOver(List<Quad> quads) {
+		
+		Quad qs = null;
+		for (Quad q : quads) {
+			if (q.contains(q.parent.mouseX, q.parent.mouseY)) {
+				q.parent.fill(200,0,0,64);
+				float[] points = q.points;
+				q.parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
+				qs = q;
+			}
+		}
+		
+		if (qs != null) {
+			PApplet p = qs.parent;
+			p.fill(0);
+			p.text("#"+qs.id+": ", p.width/2-50, 20);
+			p.text(qs.area(), p.width/2,20);
+		}
+	}
+	
+	public boolean contains(int mouseX, int mouseY) { // bounds-check only
+
+		return mouseX > bounds[0] && mouseX < bounds[0] + bounds[2] &&
+				mouseY > bounds[1] && mouseY < bounds[1] + bounds[3];
+	}
+	
 }

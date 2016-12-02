@@ -104,7 +104,8 @@ public class UvImage {
 		if (appliedAreas.size() >= UvMapper.MAX_USAGES_PER_IMG)
 			return false;
 		
-		boolean accepted = !appliedAreas.contains(quad.area());
+		float check = Math.round(quad.area()); // round to get near misses
+		boolean accepted = !appliedAreas.contains(check);
 		//if (!accepted) System.out.println("Quad#"+quad.id+" rejected for "+imageIn);
 		return accepted;
 	}

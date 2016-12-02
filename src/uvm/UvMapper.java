@@ -15,35 +15,43 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 10000, MAX_NUM_IMGS_TO_LOAD = 10000; 
-	public static int MAX_USAGES_PER_IMG = 3, MIN_ALLOWED_IMG_AREA = 100;
+	public static int MAX_NUM_QUADS_TO_LOAD = 100, MAX_NUM_IMGS_TO_LOAD = 100; 
+	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 100;
 
-	public static String DATA_FILE = "data/noTriangle.txt";
+	public static String DATA_FILE = "data/male_uv.txt";
 	public static String UV_NAME = "MaleTextureTesting1.png";
 	public static String IMAGE_DIR = "data/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
 
+	List<Quad> quads;
+	
 	public void settings() {
 
-		size(10000, 10000);
+		size(1000, 1000);
 	}
 
 	public void setup() {
 
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
-		List<Quad> quads = Quad.fromData(this, DATA_FILE);
+		quads = Quad.fromData(this, DATA_FILE);
 
 		int processed = assignImages(ads, quads);
 		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
-
+	}
+	
+	public void draw() {
+		background(255);
 		Quad.drawAll(quads);
-		
-		//saveToFile();
+		//Quad.mouseOver(quads);
+	}
+	
+	public void keyPressed() {
+		if (key=='s') saveToFile();
 	}
 
-	// Loop over Quads assigning best fiting ad image to each
+	// Assigning best fiting ad image to each quad
 	int assignImages(List<UvImage> images, List<Quad> quads) {
 
 		int successes = 0;
@@ -125,7 +133,8 @@ public class UvMapper extends PApplet {
 	void saveToFile() {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-		String fname  = dateFormat.format(new Date()) + "_" + UV_NAME;
+		String fname  = (dateFormat.format(new Date()) + "_" + UV_NAME).replaceAll(" ", "_");
+		save(fname);
 		System.out.println("Wrote " + fname);
 	}
 	
