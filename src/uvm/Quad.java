@@ -10,7 +10,7 @@ import processing.core.*;
 public class Quad {
 
 	public UvImage image;
-	public float[] points, bounds;
+	public float[] points, bounds,lengths;
 
 	public PImage warped;
 	public PApplet parent;
@@ -18,11 +18,12 @@ public class Quad {
 	
 	static int idx = 0;
 	
-	public Quad(PApplet p, float[] points) {
+	public Quad(PApplet p, float[] points, float[] lengths) {
 		
 		this.id = idx++;
 		this.parent = p;
 		this.points = points;
+		this.lengths = lengths;
 		this.repairPoints();
 		this.bounds = bounds();
 	}
@@ -174,8 +175,11 @@ public class Quad {
 
 		float h1 = (float) Math.sqrt((mPs[0][0] - mPs[2][0]) * (mPs[0][0] - mPs[2][0]) + (mPs[0][1] - mPs[2][1]) * (mPs[0][1] - mPs[2][1]));
 		float h2 = (float) Math.sqrt((mPs[1][0] - mPs[3][0]) * (mPs[1][0] - mPs[3][0]) + (mPs[1][1] - mPs[3][1]) * (mPs[1][1] - mPs[3][1]));
+    
+		float r = h1 > h2 ? h1 / h2 : h2 / h1; // always  > 1
+		if (bounds[2] / bounds[3] < 1) r = -1 / r;
 
-		return h1 > h2 ? h1 / h2 : h2 / h1;
+		return r;
 	}
 
 	public void fixOrdering() {
@@ -258,7 +262,7 @@ public class Quad {
 		parent.noStroke();
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
-			parent.stroke(0);
+			parent.stroke(50);
 			//if (this.warped != null)  parent.fill(200,0,0,32);
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
@@ -302,13 +306,15 @@ public class Quad {
 				continue;
 			
 			String[] spts = line.split(",");
-			if (spts.length != 8) {
+			if (spts.length < 8) {
 				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
 				continue;
 			}
 						
-			float[] fpts = new float[spts.length];
-			for (int i = 0; i < spts.length; i++) {
+			float[] fpts = new float[8];
+			float[] ls = new float [4];
+			
+			for (int i = 0; i < 8; i++) {
 				
 				fpts[i] = Float.parseFloat(spts[i]);
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
@@ -319,11 +325,22 @@ public class Quad {
 				if (i % 2 == 1 && UvMapper.CHANGE_ORIGIN_TO_BOTTOM_LEFT) fpts[i] = p.height - fpts[i];
 
 			}
+			
+			if(spts.length == 12){
+				
+			  for(int i = 0; i < 4; i++){
+				  ls[i] = Float.parseFloat(spts[8+i]);
+				  //scaling
+				  ls[i] *= (i % 2 == 0 ? p.width : p.height);
+			  }
+			}
+		
 
-			quads.add(new Quad(p, fpts));
+			quads.add(new Quad(p, fpts, ls));
+		
 		}
 		
-		// Sort the Quads by area
+//		 Sort the Quads by area
 		quads.sort(new Comparator<Quad>() {
 			public int compare(Quad q1, Quad q2) {
 				return q1.area() > q2.area() ? -1 : 1;

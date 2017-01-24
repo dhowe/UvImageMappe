@@ -8,19 +8,19 @@ import processing.core.PApplet;
 public class UvMapper extends PApplet {
 
 	public static boolean CROP_IMGS_TO_QUADS = false;
-	public static boolean STROKE_QUAD_OUTLINES = false;
+	public static boolean STROKE_QUAD_OUTLINES = true;
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	
 	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = true;
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 100, MAX_NUM_IMGS_TO_LOAD = 100; 
-	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 100;
+	public static int MAX_NUM_QUADS_TO_LOAD = 1000, MAX_NUM_IMGS_TO_LOAD = 1000; 
+	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
 
-	public static String DATA_FILE = "data/male_uv.txt";
-	public static String UV_NAME = "MaleTextureTesting1.png";
-	public static String IMAGE_DIR = "data/", OUTPUT_DIR = "warp/";
+	public static String DATA_FILE = "data/BerthaTestData.txt";
+	public static String UV_NAME = "BarthaTest.png";
+	public static String IMAGE_DIR = "LukasCopy/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
@@ -80,7 +80,7 @@ public class UvMapper extends PApplet {
 					continue;
 				}
 				
-				//System.out.println("Quad#"+quad.id+" gets: "+bestImg.imageOut+"/"+bestImg.imageOut);
+//				System.out.println("Quad#"+quad.id+" gets: "+bestImg);
 				
 				showProgress(++successes);
 			}
