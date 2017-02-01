@@ -262,7 +262,7 @@ public class Quad {
 		parent.noStroke();
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
-			parent.stroke(50);
+//			parent.stroke(50);
 			//if (this.warped != null)  parent.fill(200,0,0,32);
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
@@ -374,6 +374,7 @@ public class Quad {
 		}
 		return Math.abs(area / 2f);
 	}
+	
 
 	public void offset(float x, float y) {
 
@@ -496,8 +497,10 @@ public class Quad {
 		
 		if (qs != null) {
 			PApplet p = qs.parent;
+			float[] points = qs.points;
 			p.fill(0);
 			p.text("#"+qs.id+": ", p.width/2-50, 20);
+			p.text(points[0] + " " + points[1]+ " " + points[2], p.width/2-50, 40);
 			p.text(qs.area(), p.width/2,20);
 		}
 	}

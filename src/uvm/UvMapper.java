@@ -15,8 +15,8 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 1000, MAX_NUM_IMGS_TO_LOAD = 1000; 
-	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
+	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 2000; 
+	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 10;
 
 	public static String DATA_FILE = "data/BerthaTestData.txt";
 	public static String UV_NAME = "BarthaTest.png";
@@ -29,7 +29,7 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(1000, 1000);
+		size(14000, 14000);
 	}
 
 	public void setup() {
@@ -44,7 +44,7 @@ public class UvMapper extends PApplet {
 	public void draw() {
 		background(255);
 		Quad.drawAll(quads);
-		//Quad.mouseOver(quads);
+		Quad.mouseOver(quads);
 	}
 	
 	public void keyPressed() {
