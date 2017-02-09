@@ -9,17 +9,17 @@ import processing.core.PImage;
 public class UvMapper extends PApplet {
 
 	public static boolean CROP_IMGS_TO_QUADS = false;
-	public static boolean STROKE_QUAD_OUTLINES = true;
+	public static boolean STROKE_QUAD_OUTLINES = false;
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	
 	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = true;
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1; 
-	public static int MAX_USAGES_PER_IMG = 2000, MIN_ALLOWED_IMG_AREA = 10;
+	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1600; 
+	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
 
-	public static String DATA_FILE = "data/BerthaTestData.txt";
+	public static String DATA_FILE = "data/BerthaData20170205.txt";
 	public static String UV_NAME = "BarthaTest.png";
 	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
 	
@@ -30,7 +30,7 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(500, 500);
+		size(2000, 2000);
 	}
 
 	public void setup() {
@@ -38,8 +38,8 @@ public class UvMapper extends PApplet {
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		quads = Quad.fromData(this, DATA_FILE);
 
-//		int processed = assignImages(ads, quads);
-//		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
+		int processed = assignImages(ads, quads);
+		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 	}
 	
 	public void draw() {

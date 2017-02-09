@@ -6,7 +6,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class BrightnessCalculator extends PApplet{
-	public static String DATA_FILE = "data/BerthaTestData.txt";
+	public static String DATA_FILE = "data/BerthaData20170205.txt";
 	public static String BRIGHTNESS_FILE = "data/texture.jpeg";
 	public static String UV_NAME = "BarthaTest.png";
 	public static String OUTPUT_DIR = "data/";
