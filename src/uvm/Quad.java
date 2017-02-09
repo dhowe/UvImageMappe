@@ -36,7 +36,7 @@ public class Quad {
 		this.image.appliedAreas.add((float) Math.round(area()));
 
 		String cmd = toConvertCommand();
-		if (exec(cmd) == 0) { 
+		if (Terminal.exec(cmd) == 0) { 
 			
 			warped = parent.loadImage(UvMapper.OUTPUT_DIR + this.image.warpName);
 		}
@@ -274,18 +274,6 @@ public class Quad {
 		}
 
 		return this;
-	}
-
-	public static int exec(String line) {
-
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWatchdog(new ExecuteWatchdog(10000));
-		try {
-			return executor.execute(CommandLine.parse(line));
-		}
-		catch (Exception e) {
-			return 1;
-		}
 	}
 	
 	public static List<Quad> fromData(PApplet p, String dataFilePath) {
