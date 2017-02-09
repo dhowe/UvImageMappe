@@ -15,6 +15,7 @@ public class Quad {
 	public PImage warped;
 	public PApplet parent;
 	public int id, tries = 0;
+	public float brightness;
 	
 	static int idx = 0;
 	
@@ -208,6 +209,7 @@ public class Quad {
 			System.out.print(f[i] + ",");
 		}
 		System.out.println();
+	
 	}
 
 	public int upperLeftIndex() {
@@ -262,8 +264,8 @@ public class Quad {
 		parent.noStroke();
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
-//			parent.stroke(50);
-			//if (this.warped != null)  parent.fill(200,0,0,32);
+			parent.stroke(50);
+			if (this.warped != null)  parent.fill(200,0,0,32);
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
 
@@ -312,7 +314,7 @@ public class Quad {
 			}
 						
 			float[] fpts = new float[8];
-			float[] ls = new float [4];
+			float[] ls = new float [5];
 			
 			for (int i = 0; i < 8; i++) {
 				
@@ -326,9 +328,9 @@ public class Quad {
 
 			}
 			
-			if(spts.length == 12){
+			if(spts.length == 13){
 				
-			  for(int i = 0; i < 4; i++){
+			  for(int i = 0; i < 5; i++){
 				  ls[i] = Float.parseFloat(spts[8+i]);
 				  //scaling
 				  ls[i] *= (i % 2 == 0 ? p.width : p.height);
@@ -342,7 +344,10 @@ public class Quad {
 		
 //		 Sort the Quads by area
 		quads.sort(new Comparator<Quad>() {
+			
 			public int compare(Quad q1, Quad q2) {
+				
+//				return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;	
 				return q1.area() > q2.area() ? -1 : 1;
 			}
 		});
@@ -375,7 +380,54 @@ public class Quad {
 		return Math.abs(area / 2f);
 	}
 	
-
+	public float areaIn3D() {
+		
+		float t1,t2;
+		float[] ls = this.lengths;
+		
+		t1 = s(ls[0],ls[1],ls[4]);
+		t2 = s(ls[2],ls[3],ls[4]);
+	
+		return t1 + t2;
+	}
+	
+	public float getBrightness(PImage img, PApplet p) {
+		float avgB = 0;
+		System.out.print("Quad[" + id + "]");
+		
+		int minX,minY,maxX,maxY,count = 0;
+		minX =  (int) Math.floor(bounds[0]);
+		minY =  (int) Math.floor(bounds[1]);
+		maxX = (int) Math.ceil(bounds[2] + bounds[0]);
+		maxY = (int) Math.ceil(bounds[3] + bounds[1]);
+		
+//	 System.out.print(minX + "-" +  maxX + " " + minY+ "-" + maxY+ ":");
+	 //loop through all the pixels within the bound
+		for (int x = minX; x < maxX; x++) {
+	    for (int y = minY; y < maxY; y++ ) {
+	    	// calculate only the pixel within the quad
+	    	if(this.contains(x, y)){
+	    	 //Calculate the 1D location from 2D img grid
+	  			int loc =x + y * img.width;
+	  			float b = p.brightness(img.pixels[loc]);
+	  			avgB += b;
+	  			count ++;
+	    	}
+	    	//else ignore
+		 }
+		}
+		
+		this.brightness = avgB/count;
+		System.out.println(this.brightness);
+		return this.brightness;
+	}
+  
+	public float s(float a, float b, float c){
+		float s, p = (a + b + c) / 2;
+		float x = p * (p - a) * (p - b) * (p - c);
+		s = (float) Math.sqrt(x);
+		return s;
+	}
 	public void offset(float x, float y) {
 
 		for (int i = 0; i < points.length; i++)

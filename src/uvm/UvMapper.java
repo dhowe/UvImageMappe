@@ -4,6 +4,7 @@ import java.util.*;
 import java.text.SimpleDateFormat; 
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
 public class UvMapper extends PApplet {
 
@@ -15,12 +16,12 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 2000; 
-	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 10;
+	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1; 
+	public static int MAX_USAGES_PER_IMG = 2000, MIN_ALLOWED_IMG_AREA = 10;
 
 	public static String DATA_FILE = "data/BerthaTestData.txt";
 	public static String UV_NAME = "BarthaTest.png";
-	public static String IMAGE_DIR = "LukasCopy/", OUTPUT_DIR = "warp/";
+	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
@@ -29,7 +30,7 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(14000, 14000);
+		size(500, 500);
 	}
 
 	public void setup() {
@@ -37,14 +38,14 @@ public class UvMapper extends PApplet {
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		quads = Quad.fromData(this, DATA_FILE);
 
-		int processed = assignImages(ads, quads);
-		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
+//		int processed = assignImages(ads, quads);
+//		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 	}
 	
 	public void draw() {
-		background(255);
+
 		Quad.drawAll(quads);
-		Quad.mouseOver(quads);
+//		Quad.mouseOver(quads);
 	}
 	
 	public void keyPressed() {
