@@ -1,107 +1,99 @@
 package uvm;
 
+// NEXT: change 2 String[] to UvImage[] and Quad[]
 public class GaleShapley {
 
-	private int N, engagedCount;
-	private String[][] menPref;
-	private String[][] womenPref;
-	private String[] men;
-	private String[] women;
-	private String[] womenPartner;
-	private boolean[] menEngaged;
+	private int N, completed = 0;
+	private String[][] imagePrefs;
+	private String[][] quadPrefs;
+	private String[] images;
+	private String[] quads;
+	private String[] quadPartners;
+	private boolean[] imagesPaired;
 
-	/** Constructor **/
-	public GaleShapley(String[] m, String[] w, String[][] mp, String[][] wp) {
-
-		N = mp.length;
-		engagedCount = 0;
-		men = m;
-		women = w;
-		menPref = mp;
-		womenPref = wp;
-		menEngaged = new boolean[N];
-		womenPartner = new String[N];
-		calcMatches();
+	public GaleShapley(String[] i, String[] q, String[][] ip, String[][] qp) {
+		
+		images = i;
+		quads = q;
+		imagePrefs = ip;
+		quadPrefs = qp;
+		N = ip.length;
+		imagesPaired = new boolean[N];
+		quadPartners = new String[N];
 	}
 
-	/** function to calculate all matches **/
-	private void calcMatches() {
-
-		while (engagedCount < N) {
+	public static String[] computeMatches(String[] i, String[] q, String[][] ip, String[][] qp) {
+		
+		return new GaleShapley(i, q, ip, qp).compute();
+	}
+	
+	private String[] compute() {
+		while (completed < N) {
 			int free;
 			for (free = 0; free < N; free++)
-				if (!menEngaged[free]) break;
+				if (!imagesPaired[free]) break;
 
-			for (int i = 0; i < N && !menEngaged[free]; i++) {
-				int index = womenIndexOf(menPref[free][i]);
-				if (womenPartner[index] == null) {
-					womenPartner[index] = men[free];
-					menEngaged[free] = true;
-					engagedCount++;
+			for (int i = 0; i < N && !imagesPaired[free]; i++) {
+				int index = quadIndexOf(imagePrefs[free][i]);
+				if (quadPartners[index] == null) {
+					quadPartners[index] = images[free];
+					imagesPaired[free] = true;
+					completed++;
 				}
 				else {
-					String currentPartner = womenPartner[index];
-					if (morePreference(currentPartner, men[free], index)) {
-						womenPartner[index] = men[free];
-						menEngaged[free] = true;
-						menEngaged[menIndexOf(currentPartner)] = false;
+					String currentPartner = quadPartners[index];
+					if (morePreference(currentPartner, images[free], index)) {
+						quadPartners[index] = images[free];
+						imagesPaired[free] = true;
+						imagesPaired[imageIndexOf(currentPartner)] = false;
 					}
 				}
 			}
 		}
-		printCouples();
+		return quadPartners;
 	}
 
 	/** function to check if women prefers new partner over old assigned partner **/
 	private boolean morePreference(String curPartner, String newPartner, int index) {
 
 		for (int i = 0; i < N; i++) {
-			if (womenPref[index][i].equals(newPartner)) return true;
-			if (womenPref[index][i].equals(curPartner)) return false;
+			if (quadPrefs[index][i].equals(newPartner)) return true;
+			if (quadPrefs[index][i].equals(curPartner)) return false;
 		}
 		return false;
 	}
 
-	/** get men index **/
-	private int menIndexOf(String str) {
+	private int imageIndexOf(String str) {
 
 		for (int i = 0; i < N; i++)
-			if (men[i].equals(str)) return i;
+			if (images[i].equals(str)) return i;
 		return -1;
 	}
 
-	/** get women index **/
-	private int womenIndexOf(String str) {
+	private int quadIndexOf(String str) {
 
 		for (int i = 0; i < N; i++)
-			if (women[i].equals(str)) return i;
+			if (quads[i].equals(str)) return i;
 		return -1;
 	}
 
-	/** print couples **/
-	public void printCouples() {
+	public static void print(String[] quads, String[] quadPartners) {
 
-		System.out.println("Couples are : ");
-		for (int i = 0; i < N; i++) {
-			System.out.println(womenPartner[i] + " " + women[i]);
+		System.out.println("Pairs are : ");
+		for (int i = 0; i < quads.length; i++) {
+			System.out.println(quads[i] + ":"+quadPartners[i]);
 		}
 	}
 
-	/** main function **/
 	public static void main(String[] args) {
 
-		System.out.println("Gale Shapley Marriage Algorithm\n");
-		/** list of men **/
-		String[] m = { "M1", "M2", "M3", "M4", "M5" };
-		/** list of women **/
-		String[] w = { "W1", "W2", "W3", "W4", "W5" };
+		String[] images = { "I1", "I2", "I3", "I4", "I5" };
+		String[] quads = { "Q1", "Q2", "Q3", "Q4", "Q5" };
 
-		/** men preference **/
-		String[][] mp = { { "W5", "W2", "W3", "W4", "W1" }, { "W2", "W5", "W1", "W3", "W4" }, { "W4", "W3", "W2", "W1", "W5" }, { "W1", "W2", "W3", "W4", "W5" }, { "W5", "W2", "W3", "W4", "W1" } };
-		/** women preference **/
-		String[][] wp = { { "M5", "M3", "M4", "M1", "M2" }, { "M1", "M2", "M3", "M5", "M4" }, { "M4", "M5", "M3", "M2", "M1" }, { "M5", "M2", "M1", "M4", "M3" }, { "M2", "M1", "M4", "M3", "M5" } };
+		String[][] imagePrefs = { { "Q5", "Q2", "Q3", "Q4", "Q1" }, { "Q2", "Q5", "Q1", "Q3", "Q4" }, { "Q4", "Q3", "Q2", "Q1", "Q5" }, { "Q1", "Q2", "Q3", "Q4", "Q5" }, { "Q5", "Q2", "Q3", "Q4", "Q1" } };		
+		String[][] quadPrefs = { { "I5", "I3", "I4", "I1", "I2" }, { "I1", "I2", "I3", "I5", "I4" }, { "I4", "I5", "I3", "I2", "I1" }, { "I5", "I2", "I1", "I4", "I3" }, { "I2", "I1", "I4", "I3", "I5" } };
 
-		GaleShapley gs = new GaleShapley(m, w, mp, wp);
+		print(quads, GaleShapley.computeMatches(images, quads, imagePrefs, quadPrefs));
 	}
 	
 }
