@@ -4,6 +4,7 @@ import java.util.*;
 import java.text.SimpleDateFormat; 
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
 public class UvMapper extends PApplet {
 
@@ -15,12 +16,12 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 100, MAX_NUM_IMGS_TO_LOAD = 100; 
-	public static int MAX_USAGES_PER_IMG = 2, MIN_ALLOWED_IMG_AREA = 100;
+	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1600; 
+	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
 
-	public static String DATA_FILE = "data/male_uv.txt";
-	public static String UV_NAME = "MaleTextureTesting1.png";
-	public static String IMAGE_DIR = "data/", OUTPUT_DIR = "warp/";
+	public static String DATA_FILE = "data/BerthaData20170205.txt";
+	public static String UV_NAME = "BarthaTest.png";
+	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
@@ -29,7 +30,7 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(1000, 1000);
+		size(2000, 2000);
 	}
 
 	public void setup() {
@@ -42,9 +43,9 @@ public class UvMapper extends PApplet {
 	}
 	
 	public void draw() {
-		background(255);
+
 		Quad.drawAll(quads);
-		//Quad.mouseOver(quads);
+//		Quad.mouseOver(quads);
 	}
 	
 	public void keyPressed() {
@@ -80,7 +81,7 @@ public class UvMapper extends PApplet {
 					continue;
 				}
 				
-				//System.out.println("Quad#"+quad.id+" gets: "+bestImg.imageOut+"/"+bestImg.imageOut);
+//				System.out.println("Quad#"+quad.id+" gets: "+bestImg);
 				
 				showProgress(++successes);
 			}

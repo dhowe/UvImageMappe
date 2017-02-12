@@ -30,8 +30,9 @@ public class UvImage {
 	}
 
 	public float aspectRation() {
-
-		return image.width / (float) image.height;
+		float r = image.width / (float) image.height;
+		if (r < 1) r = -1 / r;
+		return r;
 	}
 
 	public String toString() {
@@ -97,16 +98,16 @@ public class UvImage {
 		return ads;
 	}
 
-	// True iff we have more applications remaining 
+	// True if we have more applications remaining 
 	// and we haven't accepted a quad with this area before
 	public boolean acceptsQuad(Quad quad) {
 		
 		if (appliedAreas.size() >= UvMapper.MAX_USAGES_PER_IMG)
 			return false;
-		
+
 		float check = Math.round(quad.area()); // round to get near misses
 		boolean accepted = !appliedAreas.contains(check);
-		//if (!accepted) System.out.println("Quad#"+quad.id+" rejected for "+imageIn);
-		return accepted;
+//		if (!accepted) System.out.println("Quad#"+quad.id+" rejected for "+imageName);
+		return true;
 	}
 }

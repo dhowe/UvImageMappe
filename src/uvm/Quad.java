@@ -10,19 +10,21 @@ import processing.core.*;
 public class Quad {
 
 	public UvImage image;
-	public float[] points, bounds;
+	public float[] points, bounds,lengths;
 
 	public PImage warped;
 	public PApplet parent;
 	public int id, tries = 0;
+	public float brightness;
 	
 	static int idx = 0;
 	
-	public Quad(PApplet p, float[] points) {
+	public Quad(PApplet p, float[] points, float[] lengths) {
 		
 		this.id = idx++;
 		this.parent = p;
 		this.points = points;
+		this.lengths = lengths;
 		this.repairPoints();
 		this.bounds = bounds();
 	}
@@ -174,8 +176,11 @@ public class Quad {
 
 		float h1 = (float) Math.sqrt((mPs[0][0] - mPs[2][0]) * (mPs[0][0] - mPs[2][0]) + (mPs[0][1] - mPs[2][1]) * (mPs[0][1] - mPs[2][1]));
 		float h2 = (float) Math.sqrt((mPs[1][0] - mPs[3][0]) * (mPs[1][0] - mPs[3][0]) + (mPs[1][1] - mPs[3][1]) * (mPs[1][1] - mPs[3][1]));
+    
+		float r = h1 > h2 ? h1 / h2 : h2 / h1; // always  > 1
+		if (bounds[2] / bounds[3] < 1) r = -1 / r;
 
-		return h1 > h2 ? h1 / h2 : h2 / h1;
+		return r;
 	}
 
 	public void fixOrdering() {
@@ -204,6 +209,7 @@ public class Quad {
 			System.out.print(f[i] + ",");
 		}
 		System.out.println();
+	
 	}
 
 	public int upperLeftIndex() {
@@ -258,8 +264,8 @@ public class Quad {
 		parent.noStroke();
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
-			parent.stroke(0);
-			//if (this.warped != null)  parent.fill(200,0,0,32);
+			parent.stroke(50);
+			if (this.warped != null)  parent.fill(200,0,0,32);
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
 
@@ -290,13 +296,15 @@ public class Quad {
 				continue;
 			
 			String[] spts = line.split(",");
-			if (spts.length != 8) {
+			if (spts.length < 8) {
 				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
 				continue;
 			}
 						
-			float[] fpts = new float[spts.length];
-			for (int i = 0; i < spts.length; i++) {
+			float[] fpts = new float[8];
+			float[] ls = new float [5];
+			
+			for (int i = 0; i < 8; i++) {
 				
 				fpts[i] = Float.parseFloat(spts[i]);
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
@@ -307,13 +315,27 @@ public class Quad {
 				if (i % 2 == 1 && UvMapper.CHANGE_ORIGIN_TO_BOTTOM_LEFT) fpts[i] = p.height - fpts[i];
 
 			}
+			
+			if(spts.length == 13){
+				
+			  for(int i = 0; i < 5; i++){
+				  ls[i] = Float.parseFloat(spts[8+i]);
+				  //scaling
+				  ls[i] *= (i % 2 == 0 ? p.width : p.height);
+			  }
+			}
+		
 
-			quads.add(new Quad(p, fpts));
+			quads.add(new Quad(p, fpts, ls));
+		
 		}
 		
-		// Sort the Quads by area
+//		 Sort the Quads by area
 		quads.sort(new Comparator<Quad>() {
+			
 			public int compare(Quad q1, Quad q2) {
+				
+//				return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;	
 				return q1.area() > q2.area() ? -1 : 1;
 			}
 		});
@@ -345,7 +367,55 @@ public class Quad {
 		}
 		return Math.abs(area / 2f);
 	}
-
+	
+	public float areaIn3D() {
+		
+		float t1,t2;
+		float[] ls = this.lengths;
+		
+		t1 = s(ls[0],ls[1],ls[4]);
+		t2 = s(ls[2],ls[3],ls[4]);
+	
+		return t1 + t2;
+	}
+	
+	public float getBrightness(PImage img, PApplet p) {
+		float avgB = 0;
+		System.out.print("Quad[" + id + "]");
+		
+		int minX,minY,maxX,maxY,count = 0;
+		minX =  (int) Math.floor(bounds[0]);
+		minY =  (int) Math.floor(bounds[1]);
+		maxX = (int) Math.ceil(bounds[2] + bounds[0]);
+		maxY = (int) Math.ceil(bounds[3] + bounds[1]);
+		
+//	 System.out.print(minX + "-" +  maxX + " " + minY+ "-" + maxY+ ":");
+	 //loop through all the pixels within the bound
+		for (int x = minX; x < maxX; x++) {
+	    for (int y = minY; y < maxY; y++ ) {
+	    	// calculate only the pixel within the quad
+	    	if(this.contains(x, y)){
+	    	 //Calculate the 1D location from 2D img grid
+	  			int loc =x + y * img.width;
+	  			float b = p.brightness(img.pixels[loc]);
+	  			avgB += b;
+	  			count ++;
+	    	}
+	    	//else ignore
+		 }
+		}
+		
+		this.brightness = avgB/count;
+		System.out.println(this.brightness);
+		return this.brightness;
+	}
+  
+	public float s(float a, float b, float c){
+		float s, p = (a + b + c) / 2;
+		float x = p * (p - a) * (p - b) * (p - c);
+		s = (float) Math.sqrt(x);
+		return s;
+	}
 	public void offset(float x, float y) {
 
 		for (int i = 0; i < points.length; i++)
@@ -467,8 +537,10 @@ public class Quad {
 		
 		if (qs != null) {
 			PApplet p = qs.parent;
+			float[] points = qs.points;
 			p.fill(0);
 			p.text("#"+qs.id+": ", p.width/2-50, 20);
+			p.text(points[0] + " " + points[1]+ " " + points[2], p.width/2-50, 40);
 			p.text(qs.area(), p.width/2,20);
 		}
 	}
