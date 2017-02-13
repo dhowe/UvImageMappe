@@ -1,32 +1,19 @@
-package uvm;
+package test;
 
-import alg.HungarianAlgorithm;
 
-public class ImageQuadSolver {
+/*
+ * simple test solver using multiplication as fitness function 
+ */
+public class MultSolver {
 	
-	protected UvImage[] workers;
-	protected Quad[] jobs;
+	protected int[] workers, jobs;
 	protected int N;
 
-	public ImageQuadSolver(UvImage[] images, Quad[] quads) {
+	public MultSolver(int[] images, int[] quads) {
 		
 		this.jobs = quads;
 		this.workers = images;
 		this.N = Math.max(workers.length, jobs.length);
-	}
-
-	public int getN() {
-		
-		return N;
-	}
-
-	/**
-	 * Returns the min cost matching of workers/images to jobs/quads
-	 * with -1 indicating an unassigned worker/image  
-	 */
-	public int[] execute() {
-		
-		return new HungarianAlgorithm(computeCostMatrix()).execute();
 	}
 	
 	/**
@@ -40,8 +27,7 @@ public class ImageQuadSolver {
 
 	/**
 	 * Computes the matrix of costs for each worker/image pair
-	 * @return the cost matrix which gives the costs for assigning the i'th worker (image) 
-	 * 				 to the j'th job (quad) at position (i, j).   
+	 * @return the cost matrix which gives the cost of assigning the i'th worker to the j'th job at position (i, j).   
 	 */
 	public double[][] computeCostMatrix() {
 
@@ -50,11 +36,16 @@ public class ImageQuadSolver {
 			for (int j = 0; j < N; j++) {
 				matrix[i][j] = -1;
 				if (j < jobs.length && i < workers.length)
-					matrix[i][j] = jobs[j].fitness(workers[i]);
+					matrix[i][j] = fakeFitness(jobs[j], workers[i]); // test fitness function
 			}
 		}
 		
 		return matrix;
+	}
+	
+	private double fakeFitness(int job, int worker) {
+
+		return job * worker;
 	}
 
 }

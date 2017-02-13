@@ -16,11 +16,26 @@ public class ImageQuadSolverTest {
 		UvImage[] workers = null;
 		Quad[] jobs = null;
 		
-		double expectedCost = .56788;
-  	int imageIndex = 0, quadIndex = 0;
+		// Test 1 -----------------------------
+		double expectedCost1 = .56788;
+  	int imageIndex1 = 0, quadIndex1 = 0;
   	
-		double result = new ImageQuadSolver(workers, jobs).cost(imageIndex, quadIndex);
-    Assert.assertTrue(expectedCost == result);
+  	double result1 = new ImageQuadSolver(workers, jobs).cost(imageIndex1, quadIndex1);
+    Assert.assertTrue(expectedCost1 == result1);
+    
+    // Test 2 -----------------------------
+		double expectedCost2 = .56788;
+  	int imageIndex2 = 0, quadIndex2 = 0;
+  	
+		double result2 = new ImageQuadSolver(workers, jobs).cost(imageIndex2, quadIndex2);
+    Assert.assertTrue(expectedCost2 == result2);
+    
+    // Test 3 -----------------------------
+		double expectedCost3 = .56788;
+  	int imageIndex3 = 0, quadIndex3 = 0;
+  	
+		double result3 = new ImageQuadSolver(workers, jobs).cost(imageIndex3, quadIndex3);
+    Assert.assertTrue(expectedCost3 == result3);
   }
   
   @Test
