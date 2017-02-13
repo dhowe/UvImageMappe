@@ -2,17 +2,23 @@ package uvm;
 
 import alg.HungarianAlgorithm;
 
-public class ImageQuadSolver {
-	
-	protected UvImage[] workers;
-	protected Quad[] jobs;
-	protected int N;
+import java.util.*;
 
-	public ImageQuadSolver(UvImage[] images, Quad[] quads) {
+public class ImageQuadSolver  {
+	
+	protected List<UvImage> workers;
+	protected List<Quad> jobs;
+	protected int N;
+	protected int workersUnit;
+	protected float jobsUnit;
+
+	public ImageQuadSolver(List<UvImage> images, List<Quad> quads) {
 		
 		this.jobs = quads;
 		this.workers = images;
-		this.N = Math.max(workers.length, jobs.length);
+		this.N = Math.max(workers.size(), jobs.size());
+		this.workersUnit = getMaxImageLength(workers);
+		this.jobsUnit = getMaxQuadLength(jobs);
 	}
 
 	public int getN() {
@@ -49,12 +55,49 @@ public class ImageQuadSolver {
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < N; j++) {
 				matrix[i][j] = -1;
-				if (j < jobs.length && i < workers.length)
-					matrix[i][j] = jobs[j].fitness(workers[i]);
+				
+				if (j < jobs.size() && i < workers.size())
+					matrix[i][j] = jobs.get(i).fitness(workers.get(i), workersUnit, jobsUnit);
 			}
 		}
 		
 		return matrix;
 	}
+	
+	int getMaxImageLength(List<UvImage> ads) {
+
+		int maxImageL = 0;
+
+		for (int i = 0; i < ads.size(); i++) {
+			if (ads.get(i).width > maxImageL || ads.get(i).height > maxImageL) {
+				maxImageL = ads.get(i).width > ads.get(i).height ? ads.get(i).width : ads.get(i).height;
+			}
+		}
+ 
+//		System.out.println("\nMax Image Lenth:"+ maxImageL);
+	
+		return maxImageL;
+	}
+	
+	float getMaxQuadLength(List<Quad> quads) {
+
+		float maxQuadLength = 0;
+
+		for (int i = 0; i < quads.size(); i++) {
+
+			float w = quads.get(i).bounds[2];
+			float h = quads.get(i).bounds[3];
+
+			if (w > maxQuadLength || h > maxQuadLength) {
+				maxQuadLength = w > h ? w : h;
+			}
+
+		}
+		
+//		System.out.println("\nMax Quad Lenth:" + maxQuadLength);
+
+		return maxQuadLength;
+	}
+	
 
 }
