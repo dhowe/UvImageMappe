@@ -27,11 +27,69 @@ public class Quad {
 		this.bounds = bounds();
 	}
 
-	public double fitness(UvImage image) {
+	public Quad(int id, float[] points) {
 		
-		// TODO: implement me (1)
+		this.points = points;
+		this.bounds = bounds();
+		this.id = id;
+	
+	}
+	
+	public double fitness(UvImage image, int imageUnit, float quadUnit) {
+
+		boolean fitnessLog = false;
+		double fit = 0;
+		// normalized points
+		double [] i = new double[8], q = new double[8];
+		if(fitnessLog) System.out.println("\n[FITNESS CALCULATION]");
+		 
+	  i[0] = i[1] = i[3] = i[6] = 0;
+	  i[2] =  i[4] = image.width/(double)imageUnit;
+	  i[5] = i[7] =  image.height/(double)imageUnit;
+	  
+	  if(fitnessLog) System.out.print("IMAGE:width " + image.width + ", height " +  image.height + "\nImage Points:");
+	  
+	  for (int j = 0; j < i.length; j++) {
+	  	String split = j%2 == 0 ? ", ":";  ";
+	  	if(fitnessLog) System.out.print(i[j] + split);
+	  }
+	  
+	  for (int j = 0; j < q.length; j++) {
+	  	q[j] = (double) this.points[j];
+	  	//central point switch to minx, miny
+	  	if(j%2 == 0) q[j] -= this.bounds[0];
+	  	else q[j] -= this.bounds[1];
+	  	//scale
+	  	q[j] = q[j]/quadUnit;
+	  }
+	  
+	  if(fitnessLog) System.out.print("\nQuad:Bound width " + this.bounds[2] + ", Bound height " +  this.bounds[3] +"\nQuad points:");
+	  
+	  for (int j = 0; j < q.length; j++) {
+	  	 
+	  	 String split = j%2 == 0 ? ", ":";  ";
+	  	 if(fitnessLog) System.out.print(q[j] + split);
+	  }
+	  
+	  fit = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
+
+//METHOD 2: get max dist
+//	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
+//	  
+//	  for (int j = 0; j < dists.length; j++) {
+//	    if (dists[j] > fit) {
+//	        fit = dists[j];
+//	    }
+//	}
+	  
+	  if(fitnessLog) System.out.println("\nFit:" + fit);
+
+		return fit;
 		
-		return -1;
+	}
+
+	double dist(double x1, double y1, double x2, double y2){
+		return Math.hypot(x1-x2, y1-y2);
 	}
 	
 	/**
@@ -352,6 +410,32 @@ public class Quad {
 		
 		return quads;
 	}
+	
+	public static List<Quad> fromString (String data) {
+		
+		List<Quad> quads = new ArrayList<Quad>();
+		String[] lines = data.split(";");
+		
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			String[] spts = line.split(",");
+
+			float[] fpts = new float[8];
+
+			for (int j = 0; j < 8; j++) {
+
+				fpts[j] = Float.parseFloat(spts[j]);
+
+			}
+
+			quads.add(new Quad(i, fpts));
+
+		}
+		;
+		
+		return quads;
+	}
+
 
 	public static void drawAll(List<Quad> quads) {
 

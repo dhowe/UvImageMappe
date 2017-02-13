@@ -22,6 +22,13 @@ public class UvImage {
 		this.appliedAreas = new ArrayList<Float>();
 		this.warpName = changeExt(imageName, ".png");
 	}
+	
+	public UvImage(String name, int width, int height) {
+		this.width = width;
+		this.height = height;
+		this.imageName = name;
+		
+	}
 
 	public String changeExt(String fileName, String ext) {
 		
