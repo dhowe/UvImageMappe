@@ -1,15 +1,10 @@
 package test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 
-import uvm.ImageQuadSolver;
-import uvm.Quad;
-import uvm.UvImage;
+import uvm.*;
 
 public class ImageQuadSolverTest {
 	
