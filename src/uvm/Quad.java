@@ -3,8 +3,6 @@ package uvm;
 import java.awt.geom.Line2D;
 import java.util.*;
 
-import org.apache.commons.exec.*;
-
 import processing.core.*;
 
 public class Quad {
@@ -29,6 +27,13 @@ public class Quad {
 		this.bounds = bounds();
 	}
 
+	public double fitness(UvImage image) {
+		
+		// TODO: implement me (1)
+		
+		return -1;
+	}
+	
 	/**
 	 * Returns true if image was successfully warped, then loaded, otherwise false
 	 */

@@ -1,4 +1,4 @@
-package uvm;
+package alg;
 
 // NEXT: change 2 String[] to UvImage[] and Quad[]
 public class GaleShapley {
