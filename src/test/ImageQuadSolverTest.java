@@ -1,14 +1,11 @@
 package test;
 
 import java.util.*;
-
 import org.junit.*;
-
 import uvm.*;
 
 public class ImageQuadSolverTest {
 	
-	String IMAGE_DIR = "allImages/images/";
 	List<UvImage> workers = new ArrayList<UvImage>();
 	List<Quad> jobs;
 	
@@ -55,7 +52,7 @@ public class ImageQuadSolverTest {
   	
   	double result1 = new ImageQuadSolver(workers, jobs).cost(imageIndex1, quadIndex1);
   	System.out.println("Test1:" + result1 + "\n");
-//    Assert.assertTrue(expectedCost1 == result1);
+  	Assert.assertTrue(expectedCost1 == result1);
   	
     
     // Test 2 -----------------------------
@@ -94,7 +91,7 @@ public class ImageQuadSolverTest {
   	
 		double result3 = new ImageQuadSolver(workers, jobs).cost(imageIndex3, quadIndex3);
 		System.out.println("Test3:" + result3 + "\n");
-//    Assert.assertTrue(expectedCost3 == result3);
+		Assert.assertTrue(expectedCost3 == result3);
   	
   }
   

@@ -6,24 +6,18 @@ import java.util.*;
 
 public class ImageQuadSolver  {
 	
-	protected List<UvImage> workers;
-	protected List<Quad> jobs;
-	protected int N;
-	protected int workersUnit;
-	protected float jobsUnit;
+	protected UvImage[] workers;
+	protected Quad[] jobs;
 
 	public ImageQuadSolver(List<UvImage> images, List<Quad> quads) {
 		
+		this(images.toArray(new UvImage[0]), quads.toArray(new Quad[0]));
+	}
+	
+	public ImageQuadSolver(UvImage[] images, Quad[] quads) {
+		
 		this.jobs = quads;
 		this.workers = images;
-		this.N = Math.max(workers.size(), jobs.size());
-		this.workersUnit = getMaxImageLength(workers);
-		this.jobsUnit = getMaxQuadLength(jobs);
-	}
-
-	public int getN() {
-		
-		return N;
 	}
 
 	/**
@@ -40,6 +34,7 @@ public class ImageQuadSolver  {
 	 * @return the cost of assigning the i'th worker (image) to the j'th job (quad) at position (i, j).   
 	 */
 	public double cost(int imageIndexI, int quadIndexJ) {
+		
 		return computeCostMatrix()[imageIndexI][quadIndexJ];
 	}
 
@@ -50,54 +45,50 @@ public class ImageQuadSolver  {
 	 */
 	public double[][] computeCostMatrix() {
 
-		double[][] matrix = new double[workers.size()][jobs.size()];
-		for (int i = 0; i < workers.size(); i++) {
-			for (int j = 0; j < jobs.size(); j++) {
-				matrix[i][j] = -1;
-//				System.out.print(i+ " "+ j + " " + workers.size() + " " + jobs.size());
-				if (j < jobs.size() && i < workers.size())
-					matrix[i][j] = jobs.get(j).fitness(workers.get(i), workersUnit, jobsUnit);
-//				 System.out.print(matrix[i][j] + " ");
-			
+		float jobsUnit = getMaxQuadLength(jobs);
+		float workersUnit = getMaxImageLength(workers);
+		
+		double[][] matrix = new double[workers.length][jobs.length];
+		for (int i = 0; i < workers.length; i++) {
+			for (int j = 0; j < jobs.length; j++) {
+					matrix[i][j] = jobs[j].fitness(workers[i], workersUnit, jobsUnit);
 			}
 		}
 		return matrix;
 	}
 	
-	int getMaxImageLength(List<UvImage> ads) {
+	float getMaxImageLength(UvImage[] ads) {
 
-		int maxImageL = 0;
+		float maxImageL = 0;
 
-		for (int i = 0; i < ads.size(); i++) {
-			if (ads.get(i).width > maxImageL || ads.get(i).height > maxImageL) {
-				maxImageL = ads.get(i).width > ads.get(i).height ? ads.get(i).width : ads.get(i).height;
+		for (int i = 0; i < ads.length; i++) {
+			
+			float w = ads[i].width;
+			float h = ads[i].height;
+			
+			if (w > maxImageL || h > maxImageL) {
+				maxImageL = w > h ? w : h;
 			}
 		}
- 
-		System.out.println("\nMax Image Lenth:"+ maxImageL);
-	
+
 		return maxImageL;
 	}
 	
-	float getMaxQuadLength(List<Quad> quads) {
+	float getMaxQuadLength(Quad[] quads) {
 
 		float maxQuadLength = 0;
+		
+		for (int i = 0; i < quads.length; i++) {
 
-		for (int i = 0; i < quads.size(); i++) {
-
-			float w = quads.get(i).bounds[2];
-			float h = quads.get(i).bounds[3];
+			float w = quads[i].bounds[2];
+			float h = quads[i].bounds[3];
 
 			if (w > maxQuadLength || h > maxQuadLength) {
 				maxQuadLength = w > h ? w : h;
 			}
-
 		}
-		
-		System.out.println("\nMax Quad Lenth:" + maxQuadLength);
 
 		return maxQuadLength;
 	}
 	
-
 }

@@ -35,7 +35,7 @@ public class Quad {
 	
 	}
 	
-	public double fitness(UvImage image, int imageUnit, float quadUnit) {
+	public double fitness(UvImage image, float imageUnit, float quadUnit) {
 
 		boolean fitnessLog = false;
 		double fit = 0;
@@ -45,7 +45,7 @@ public class Quad {
 	  
 	  //normalize quad
 	  for (int j = 0; j < q.length; j++) {
-	  	q[j] = (double) this.points[j];
+	  	q[j] = this.points[j];
 	  	//central point switch to minx, miny
 	  	if(j%2 == 0) q[j] -= this.bounds[0];
 	  	else q[j] -= this.bounds[1];
