@@ -30,6 +30,20 @@ public class ImageQuadSolver  {
 	}
 	
 	/**
+	 * Returns the min cost matching of workers/images to jobs/quads
+	 * with -1 indicating an unassigned worker/image  
+	 */
+	public void executeAndAssign() {
+		
+		int[] pairings = new HungarianAlgorithm(computeCostMatrix()).execute();
+		for (int i = 0; i < pairings.length; i++) {
+				if (pairings[i] != -1)
+					jobs[pairings[i]].image = workers[i];
+					//System.out.println(i+") Quad@"+jobs.get(result[i]).id+" :: Image#"+workers.get(i).imageName);
+		}
+	}
+	
+	/**
 	 * Computes the cost of a single worker/job pair
 	 * @return the cost of assigning the i'th worker (image) to the j'th job (quad) at position (i, j).   
 	 */
