@@ -132,10 +132,33 @@ public class ImageQuadSolverTest {
 		}
 		
 		System.out.println("\n");
-		// a - quad[2] - horizontal
 		// b - quad[0] - square
+		// c - quad[1] - vertical
      Assert.assertTrue(Arrays.equals(new int[] {-1,0,1}, result));
   }
   
+  @Test
+  public void testExecute3() {
+  	
+  	// when the number of workers is less than the number of jobs
+  		
+  	assignTestData();
+  	workers.remove(2);
+
+		// the min cost matching of workers to jobs, 
+		// with -1 indicating an unassigned worker/image
+		int[] result = new ImageQuadSolver(workers, jobs).execute();
+		System.out.println(result[0]+ " " + result[1]);
+		
+		for (int i = 0; i < result.length; i++) {
+			if(result[i] != -1)
+			System.out.println(i+") Quad@"+jobs.get(result[i]).id+" :: Image#"+workers.get(i).imageName);
+		}
+		
+		System.out.println("\n");
+		// a - quad[2] - horizontal
+		// b - quad[0] - square
+     Assert.assertTrue(Arrays.equals(new int[] {2,0}, result));
+  }
   
 }
