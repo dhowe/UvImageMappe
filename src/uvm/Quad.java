@@ -42,18 +42,8 @@ public class Quad {
 		// normalized points
 		double [] i = new double[8], q = new double[8];
 		if(fitnessLog) System.out.println("\n[FITNESS CALCULATION]");
-		 
-	  i[0] = i[1] = i[3] = i[6] = 0;
-	  i[2] =  i[4] = image.width/(double)imageUnit;
-	  i[5] = i[7] =  image.height/(double)imageUnit;
 	  
-	  if(fitnessLog) System.out.print("IMAGE:width " + image.width + ", height " +  image.height + "\nImage Points:");
-	  
-	  for (int j = 0; j < i.length; j++) {
-	  	String split = j%2 == 0 ? ", ":";  ";
-	  	if(fitnessLog) System.out.print(i[j] + split);
-	  }
-	  
+	  //normalize quad
 	  for (int j = 0; j < q.length; j++) {
 	  	q[j] = (double) this.points[j];
 	  	//central point switch to minx, miny
@@ -63,16 +53,55 @@ public class Quad {
 	  	q[j] = q[j]/quadUnit;
 	  }
 	  
-	  if(fitnessLog) System.out.print("\nQuad:Bound width " + this.bounds[2] + ", Bound height " +  this.bounds[3] +"\nQuad points:");
+	  if(fitnessLog) System.out.print("\nQuad[" + this.id + "]:Bound width " + this.bounds[2] + ", Bound height " +  this.bounds[3] +"\nQuad points:");
 	  
 	  for (int j = 0; j < q.length; j++) {
 	  	 
-	  	 String split = j%2 == 0 ? ", ":";  ";
+	  	 String split = j%2 == 0 ? ", ":"; ";
 	  	 if(fitnessLog) System.out.print(q[j] + split);
 	  }
 	  
-	  fit = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
+		//normalize images
+	  i[0] = i[1] = i[3] = i[6] = 0;
+	  i[2] =  i[4] = image.width/(double)imageUnit;
+	  i[5] = i[7] =  image.height/(double)imageUnit;
+	  
+	  if(fitnessLog) System.out.print("\nIMAGE[" + image.imageName + "]:width " + image.width + ", height " +  image.height + "\nImage Points:");
+	  
+	  for (int j = 0; j < i.length; j++) {
+	  	String split = j%2 == 0 ? ", ":";  ";
+	  	if(fitnessLog) System.out.print(i[j] + split);
+	  }
 
+	  //allign images to quad
+		float bw = this.bounds[2]/quadUnit;
+		float bh = this.bounds[3]/quadUnit;
+		
+		 if(fitnessLog) System.out.print("\nQuad Bound width:" + bw + ", height" + bh);
+		 
+		if (image.width > image.height) {
+			 if(fitnessLog) System.out.print("\nAlign Image with Width");
+			 i[2] = i[4] = bw;
+			i[5] = i[7] = i[2] * image.height / image.width;
+			
+		}
+		else {
+			if(fitnessLog) System.out.print("\nAlign Image with Height");
+			i[5] = i[7] = bh;
+			i[2] = i[4] = i[5] * image.width / image.height;
+			
+		}
+	  
+	  if(fitnessLog) System.out.print("\nImage Points after allignment:");
+	  
+	  for (int j = 0; j < i.length; j++) {
+	  	String split = j%2 == 0 ? ", ":";  ";
+	  	if(fitnessLog) System.out.print(i[j] + split);
+	  }
+	 
+	  
+	  fit = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
+//
 //METHOD 2: get max dist
 //	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
 //	  

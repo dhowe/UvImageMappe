@@ -16,10 +16,10 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1600; 
+	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 100; 
 	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
 
-	public static String DATA_FILE = "data/BerthaData20170205.txt";
+	public static String DATA_FILE = "data/BerthaEyes.txt";
 	public static String UV_NAME = "BarthaTest.png";
 	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
 	
@@ -30,7 +30,7 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(2000, 2000);
+		size(1000, 1000);
 	}
 
 	public void setup() {
@@ -38,7 +38,7 @@ public class UvMapper extends PApplet {
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		quads = Quad.fromData(this, DATA_FILE);
 
-		int processed = assignImages(ads, quads);
+		int processed = assignImagesWithFitness(ads, quads);
 		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 	}
 	
@@ -51,7 +51,49 @@ public class UvMapper extends PApplet {
 	public void keyPressed() {
 		if (key=='s') saveToFile();
 	}
+  
+	int assignImagesWithFitness(List<UvImage> images, List<Quad> quads) {
 
+		int successes = 0;
+		if (images != null) {
+			
+			int[] result = new ImageQuadSolver(images, quads).execute();
+			for (int i = 0; i < result.length; i++) {
+			System.err.print(result[i ]+",");
+			}
+
+			for (int i = 0; i < quads.size(); i++) {
+				
+				Quad quad = quads.get(i);				
+				UvImage bestImg = images.get(result[i]);
+				
+				if (bestImg == null) {
+					
+					System.err.println("Quad#"+quad.id+" null image!\n");
+					continue;
+				}
+				
+				if (!quad.assignImage(bestImg)) {
+					
+					System.err.println("Quad#"+quad.id+" unable to assign image: "+bestImg.warpName+"/"+bestImg.warpName+"\n");
+					
+					if (++quad.tries < 3) // max 3 tries for any quad
+						i--; // retry 
+					else 
+						System.err.println("Giving up on Quad#"+quad.id+"\n"+quad);
+					
+					continue;
+				}
+				
+//				System.out.println("Quad#"+quad.id+" gets: "+bestImg);
+				
+				showProgress(++successes);
+			}
+		}
+
+		return successes;
+	}
+	
 	// Assigning best fiting ad image to each quad
 	int assignImages(List<UvImage> images, List<Quad> quads) {
 
