@@ -38,7 +38,7 @@ public class ImageQuadSolver {
 		int[] pairings = new HungarianAlgorithm(computeCostMatrix()).execute();
 		for (int i = 0; i < pairings.length; i++) {
 			if (pairings[i] != -1) {
-				jobs[pairings[i]].image = workers[i];
+				jobs[pairings[i]].assignImage(workers[i]);
 			}
 			// System.out.println(i+") Quad@"+jobs.get(result[i]).id+" :: Image#"+workers.get(i).imageName);
 		}

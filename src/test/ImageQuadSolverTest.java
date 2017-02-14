@@ -158,9 +158,9 @@ public class ImageQuadSolverTest {
 		ImageQuadSolver solver = new ImageQuadSolver(workers, jobs);
 		solver.assign();
 
-		Assert.assertTrue(workers.get(0) == jobs.get(2).image);
-		Assert.assertTrue(workers.get(1) == jobs.get(0).image);
-		Assert.assertTrue(workers.get(2) == jobs.get(1).image);
+		Assert.assertTrue(workers.get(0) == jobs.get(2).getImage());
+		Assert.assertTrue(workers.get(1) == jobs.get(0).getImage());
+		Assert.assertTrue(workers.get(2) == jobs.get(1).getImage());
 	}
 
 }

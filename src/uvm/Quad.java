@@ -7,13 +7,13 @@ import processing.core.*;
 
 public class Quad {
 
-	public UvImage image;
-	public float[] points, bounds,lengths;
-
-	public PImage warped;
+	protected UvImage image;
+	protected PImage warped;
+	protected float brightness;
+	
+	public float[] points, bounds, lengths;
 	public PApplet parent;
 	public int id, tries = 0;
-	public float brightness;
 	
 	static int idx = 0;
 	
@@ -35,6 +35,11 @@ public class Quad {
 	
 	}
 	
+	public UvImage getImage() {
+		
+		return image;
+	}
+
 	public double fitness(UvImage image, float imageUnit, float quadUnit) {
 
 		boolean fitnessLog = false;
@@ -497,9 +502,10 @@ public class Quad {
 		return t1 + t2;
 	}
 	
-	public float getBrightness(PImage img, PApplet p) {
+	public float computeBrightness(PImage img) {
+		
 		float avgB = 0;
-		System.out.print("Quad[" + id + "]");
+		//System.out.print("Quad[" + id + "]");
 		
 		int minX,minY,maxX,maxY,count = 0;
 		minX =  (int) Math.floor(bounds[0]);
@@ -515,7 +521,7 @@ public class Quad {
 	    	if(this.contains(x, y)){
 	    	 //Calculate the 1D location from 2D img grid
 	  			int loc =x + y * img.width;
-	  			float b = p.brightness(img.pixels[loc]);
+	  			float b = parent.brightness(img.pixels[loc]);
 	  			avgB += b;
 	  			count ++;
 	    	}
@@ -524,7 +530,7 @@ public class Quad {
 		}
 		
 		this.brightness = avgB/count;
-		System.out.println(this.brightness);
+
 		return this.brightness;
 	}
   
