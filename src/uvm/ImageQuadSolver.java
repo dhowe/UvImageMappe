@@ -40,7 +40,6 @@ public class ImageQuadSolver  {
 	 * @return the cost of assigning the i'th worker (image) to the j'th job (quad) at position (i, j).   
 	 */
 	public double cost(int imageIndexI, int quadIndexJ) {
-		
 		return computeCostMatrix()[imageIndexI][quadIndexJ];
 	}
 
@@ -51,16 +50,17 @@ public class ImageQuadSolver  {
 	 */
 	public double[][] computeCostMatrix() {
 
-		double[][] matrix = new double[N][N];
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
+		double[][] matrix = new double[workers.size()][jobs.size()];
+		for (int i = 0; i < workers.size(); i++) {
+			for (int j = 0; j < jobs.size(); j++) {
 				matrix[i][j] = -1;
-				
+//				System.out.print(i+ " "+ j + " " + workers.size() + " " + jobs.size());
 				if (j < jobs.size() && i < workers.size())
-					matrix[i][j] = jobs.get(i).fitness(workers.get(i), workersUnit, jobsUnit);
+					matrix[i][j] = jobs.get(j).fitness(workers.get(i), workersUnit, jobsUnit);
+//				 System.out.print(matrix[i][j] + " ");
+			
 			}
 		}
-		
 		return matrix;
 	}
 	
@@ -74,7 +74,7 @@ public class ImageQuadSolver  {
 			}
 		}
  
-//		System.out.println("\nMax Image Lenth:"+ maxImageL);
+		System.out.println("\nMax Image Lenth:"+ maxImageL);
 	
 		return maxImageL;
 	}
@@ -94,7 +94,7 @@ public class ImageQuadSolver  {
 
 		}
 		
-//		System.out.println("\nMax Quad Lenth:" + maxQuadLength);
+		System.out.println("\nMax Quad Lenth:" + maxQuadLength);
 
 		return maxQuadLength;
 	}
