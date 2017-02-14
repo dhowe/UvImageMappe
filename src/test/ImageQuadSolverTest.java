@@ -1,7 +1,9 @@
 package test;
 
 import java.util.*;
+
 import org.junit.*;
+
 import uvm.*;
 
 public class ImageQuadSolverTest {
@@ -148,6 +150,17 @@ public class ImageQuadSolverTest {
 		// a - quad[2] - horizontal
 		// b - quad[0] - square
 		Assert.assertTrue(Arrays.equals(new int[] { 2, 0 }, result));
+	}
+	
+	@Test
+	public void testAssign1() {
+
+		ImageQuadSolver solver = new ImageQuadSolver(workers, jobs);
+		solver.assign();
+
+		Assert.assertTrue(workers.get(0) == jobs.get(2).image);
+		Assert.assertTrue(workers.get(1) == jobs.get(0).image);
+		Assert.assertTrue(workers.get(2) == jobs.get(1).image);
 	}
 
 }
