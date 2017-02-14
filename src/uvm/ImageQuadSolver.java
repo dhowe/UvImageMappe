@@ -40,7 +40,6 @@ public class ImageQuadSolver  {
 	 * @return the cost of assigning the i'th worker (image) to the j'th job (quad) at position (i, j).   
 	 */
 	public double cost(int imageIndexI, int quadIndexJ) {
-		System.out.println(imageIndexI + " " + quadIndexJ);
 		return computeCostMatrix()[imageIndexI][quadIndexJ];
 	}
 
@@ -58,10 +57,9 @@ public class ImageQuadSolver  {
 //				System.out.print(i+ " "+ j + " " + workers.size() + " " + jobs.size());
 				if (j < jobs.size() && i < workers.size())
 					matrix[i][j] = jobs.get(j).fitness(workers.get(i), workersUnit, jobsUnit);
-				 System.out.print(matrix[i][j] + " ");
+//				 System.out.print(matrix[i][j] + " ");
 			
 			}
-			System.out.print("\n");
 		}
 		return matrix;
 	}

@@ -58,14 +58,22 @@ public class UvMapper extends PApplet {
 		if (images != null) {
 			
 			int[] result = new ImageQuadSolver(images, quads).execute();
+			List<Integer> resultList = new ArrayList<Integer>();
+			
 			for (int i = 0; i < result.length; i++) {
-			System.err.print(result[i ]+",");
+			System.out.print(result[i]+",");
+			resultList.add(result[i]);
 			}
+			System.out.println("");
 
 			for (int i = 0; i < quads.size(); i++) {
-				
-				Quad quad = quads.get(i);				
-				UvImage bestImg = images.get(result[i]);
+				Quad quad = quads.get(i);
+				UvImage bestImg = null;
+				int idx = resultList.indexOf(i); 
+//				System.out.println(i + " " + idx);
+				if( idx != -1){			
+					bestImg = images.get(idx);
+				}
 				
 				if (bestImg == null) {
 					
