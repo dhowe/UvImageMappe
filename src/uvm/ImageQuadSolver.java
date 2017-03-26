@@ -8,6 +8,8 @@ public class ImageQuadSolver {
 
 	protected UvImage[] workers;
 	protected Quad[] jobs;
+	protected float weight1 = 1, weight2 = 0;
+	//default is to use first approach and ignore the second;
 
 	public ImageQuadSolver(List<UvImage> images, List<Quad> quads) {
 
@@ -54,6 +56,11 @@ public class ImageQuadSolver {
 
 		return computeCostMatrix()[imageIndexI][quadIndexJ];
 	}
+	
+	public void setWeights(float w1, float w2) {
+		weight1 = w1;
+		weight2 = w2;
+	}
 
 	/**
 	 * Computes the matrix of costs for each worker/image pair
@@ -69,7 +76,7 @@ public class ImageQuadSolver {
 		double[][] matrix = new double[workers.length][jobs.length];
 		for (int i = 0; i < workers.length; i++) {
 			for (int j = 0; j < jobs.length; j++) {
-				matrix[i][j] = jobs[j].fitness(workers[i], workersUnit, jobsUnit);
+				matrix[i][j] = jobs[j].fitness(workers[i], workersUnit, jobsUnit, weight1, weight2);
 			}
 		}
 		return matrix;

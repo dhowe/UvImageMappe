@@ -7,7 +7,7 @@ import processing.core.PImage;
 
 public class BrightnessCalculator extends PApplet {
 
-	public static String DATA_FILE = "data/BerthaData20170205.txt";
+	public static String DATA_FILE = "data/Bertha_latest.txt";
 	public static String BRIGHTNESS_FILE = "data/texture.jpeg";
 	public static String UV_NAME = "BarthaTest.png";
 	public static String OUTPUT_DIR = "data/";
@@ -20,6 +20,8 @@ public class BrightnessCalculator extends PApplet {
 		size(1000, 1000);
 		img = loadImage(BRIGHTNESS_FILE);
 		img.loadPixels();
+		
+		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 	}
 
 	public void setup() {

@@ -40,10 +40,16 @@ public class Quad {
 		return image;
 	}
 
-	public double fitness(UvImage image, float imageUnit, float quadUnit) {
+	public double fitness(UvImage image, float imageUnit, float quadUnit, float w1, float w2) {
 
 		boolean fitnessLog = false;
 		double fit = 0;
+		
+		//compare the brightness between quad and image, if they don't match(dark-dark;light-light)
+		//return a big fitness 
+		this.brightness 
+		
+		
 		// normalized points
 		double [] i = new double[8], q = new double[8];
 		if(fitnessLog) System.out.println("\n[FITNESS CALCULATION]");
@@ -105,18 +111,23 @@ public class Quad {
 	  }
 	 
 	  
-	  fit = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
-//
-//METHOD 2: get max dist
-//	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
-//	  
-//	  for (int j = 0; j < dists.length; j++) {
-//	    if (dists[j] > fit) {
-//	        fit = dists[j];
-//	    }
-//	}
+	  double maxWarp = 0, distWarp = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
+
+    //METHOD 2: get max dist
+	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
+
+	  for (int j = 0; j < dists.length; j++) {
+	    if (dists[j] > fit) {
+	        maxWarp = dists[j];
+	     }
+	   }
 	  
+	  
+	  fit = w1*distWarp + w2*maxWarp;
+	  
+	 
 	  if(fitnessLog) System.out.println("\nFit:" + fit);
+	  
 
 		return fit;
 		

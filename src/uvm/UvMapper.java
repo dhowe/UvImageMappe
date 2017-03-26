@@ -16,12 +16,13 @@ public class UvMapper extends PApplet {
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 100; 
-	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
+	public static int MAX_NUM_QUADS_TO_LOAD = 2400, MAX_NUM_IMGS_TO_LOAD = 2066; 
+	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 100;
+	public static float WEIGHT_DIST = 1, WEIGHT_MAX = 0;
 
-	public static String DATA_FILE = "data/BerthaEyes.txt";
+	public static String DATA_FILE = "data/BerthaTeeth.txt";
 	public static String UV_NAME = "BarthaTest.png";
-	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
+	public static String IMAGE_DIR = "BerthaConverted/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
@@ -30,16 +31,21 @@ public class UvMapper extends PApplet {
 	
 	public void settings() {
 
-		size(1000, 1000);
+		size(2000, 2000);
 	}
 
 	public void setup() {
 
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		quads = Quad.fromData(this, DATA_FILE);
-
-		int processed = assignImagesWithFitness(ads, quads);
-		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
+    
+		//new Fitness approach
+		ImageQuadSolver process = new ImageQuadSolver(ads, quads);
+		process.assign();
+		
+		//Old Aspect Ratio method
+//		int processed = assignImages(ads, quads);
+//		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
 	}
 	
 	public void draw() {
