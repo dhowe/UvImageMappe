@@ -10,6 +10,7 @@ public class Quad {
 	protected UvImage image;
 	protected PImage warped;
 	protected float brightness;
+	protected int brightnessFlag = -1;
 	
 	public float[] points, bounds, lengths;
 	public PApplet parent;
@@ -23,7 +24,7 @@ public class Quad {
 		this.parent = p;
 		this.points = points;
 		this.lengths = lengths;
-		this.repairPoints();
+//		this.repairPoints();
 		this.bounds = bounds();
 	}
 
@@ -40,14 +41,32 @@ public class Quad {
 		return image;
 	}
 
-	public double fitness(UvImage image, float imageUnit, float quadUnit) {
+	public double fitness(UvImage image, float imageUnit, float quadUnit, float w1, float w2) {
 
 		boolean fitnessLog = false;
 		double fit = 0;
-		// normalized points
+		
+		//compare the brightness between quad and image, if they don't match(dark-dark;light-light)
+		//return a big fitness 
+		if (fitnessLog) 
+			System.out.println("ImageBrightness: "+ image.getBrightnessFlag() + " Quad Brightness" + this.getBrightnessFlag());
+		
+		if(Math.abs(image.brightness - this.brightness) > 0.3) {
+			fit = 10;
+			return fit;
+		}
+		
+//		if (image.getBrightnessFlag() != -1 && this.getBrightnessFlag() != -1 && image.getBrightnessFlag() != this.getBrightnessFlag()) {
+//			fit = 10;
+//			return fit;
+//		}
+			
+		//normalized points
+		
 		double [] i = new double[8], q = new double[8];
-		if(fitnessLog) System.out.println("\n[FITNESS CALCULATION]");
-	  
+		if (fitnessLog) 
+			System.out.println("\n[FITNESS CALCULATION]");
+		
 	  //normalize quad
 	  for (int j = 0; j < q.length; j++) {
 	  	q[j] = this.points[j];
@@ -105,18 +124,24 @@ public class Quad {
 	  }
 	 
 	  
-	  fit = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
-//
-//METHOD 2: get max dist
-//	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
-//	  
-//	  for (int j = 0; j < dists.length; j++) {
-//	    if (dists[j] > fit) {
-//	        fit = dists[j];
-//	    }
-//	}
+	  double maxWarp = 0, distWarp = dist(i[0],i[1],q[0],q[1]) + dist(i[2],i[3],q[2],q[3]) + dist(i[4],i[5],q[4],q[5]) + dist(i[6],i[7],q[6],q[7]);
+
+    //METHOD 2: get max distance
+	  double[] dists = {dist(i[0],i[1],q[0],q[1]), dist(i[2],i[3],q[2],q[3]), dist(i[4],i[5],q[4],q[5]), dist(i[6],i[7],q[6],q[7])};
+
+	  for (int j = 0; j < dists.length; j++) {
+	    if (dists[j] > fit) {
+	        maxWarp = dists[j];
+	     }
+	   }
 	  
+	  
+	  fit = w1*distWarp + w2*maxWarp;
+	  
+//	  fit += (Math.abs(image.brightness - this.brightness)＊Math.pow(-Integer.MAX_VALUE);
+
 	  if(fitnessLog) System.out.println("\nFit:" + fit);
+	  
 
 		return fit;
 		
@@ -362,18 +387,28 @@ public class Quad {
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
 			parent.stroke(50);
-			if (this.warped != null)  parent.fill(200,0,0,32);
+			
+		//draw brightness
+			if(UvMapper.FILL_QUAD_BRIGHTNESS && UvMapper.CONSIDER_BRIGHTNESS){
+				float c = 150;
+				if (this.brightness != -1) c = this.brightness*255;
+//				System.out.println(this.brightness + " " + c);
+				 parent.fill(c);
+			}
+			
+//			if (this.warped != null)  parent.fill(200,0,0,32);
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
 
+
 		if (UvMapper.DRAW_QUAD_DEBUG_DATA) {
-			parent.fill(255);
+			parent.fill(30);
 			float[] ct = centroid();
 			parent.textSize(18);
 			parent.text(id , ct[0], ct[1]); // id 
-			parent.textSize(12);
-			for (int i = 0; i < points.length; i += 2)
-				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
+//			parent.textSize(12);
+//			for (int i = 0; i < points.length; i += 2)
+//				parent.text(i + "," + (i + 1), points[i], points[i + 1]);
 		}
 
 		return this;
@@ -502,10 +537,9 @@ public class Quad {
 		return t1 + t2;
 	}
 	
-	public float computeBrightness(PImage img) {
+	public float computeBrightness(PImage img, PApplet p) {
 		
 		float avgB = 0;
-		//System.out.print("Quad[" + id + "]");
 		
 		int minX,minY,maxX,maxY,count = 0;
 		minX =  (int) Math.floor(bounds[0]);
@@ -529,9 +563,27 @@ public class Quad {
 		 }
 		}
 		
-		this.brightness = avgB/count;
+		this.brightness = avgB/count/255;
+		
+		this.brightnessFlag = this.brightness > UvMapper.QUAD_BRIGHTNESS_FLAG_LINE ? 1 : 0;
 
 		return this.brightness;
+	}
+	
+	public float getBrightness(PImage img) {
+		
+		System.out.print("Quad[" + id + "]");
+		System.out.println(this.brightness);
+		return this.brightness;
+	}
+	
+	public void setBrightness(float b) {
+		  this.brightness = b;
+			this.brightnessFlag = this.brightness > UvMapper.QUAD_BRIGHTNESS_FLAG_LINE ? 1 : 0;
+	}
+	
+	public int getBrightnessFlag () {
+		return this.brightnessFlag;
 	}
   
 	public float s(float a, float b, float c){

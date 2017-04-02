@@ -12,6 +12,8 @@ public class UvImage {
 	public int width, height;
 	public String imageName, warpName;
 	public ArrayList<Float> appliedAreas;
+	public float brightness = -1;
+	public int brightnessFlag = -1;
 
 	public UvImage(PImage image, String imageName) {
 		
@@ -21,6 +23,9 @@ public class UvImage {
 		this.height = this.image.height;
 		this.appliedAreas = new ArrayList<Float>();
 		this.warpName = changeExt(imageName, ".png");
+	  //Image Brightness
+		if (UvMapper.CONSIDER_BRIGHTNESS && !UvMapper.USE_IMAGE_BRIGHTNESS_DATA)
+		  this.brightness = calculateImageBrightness();
 	}
 	
 	public UvImage(String name, int width, int height) {
@@ -53,10 +58,35 @@ public class UvImage {
 		return width * height;
 	}
 	
+	public void setImageBrightness(float b) {
+		
+		this.brightness = b;
+//		System.out.print(this.brightness);
+//		if(this.brightness != b)
+//			System.out.print(this.imageName + "WRONG!!!!");
+//		else
+//			System.out.print("yes");
+	}
+	
+  public float calculateImageBrightness() {
+		
+		String command =  UvMapper.CONVERT_CMD + UvMapper.IMAGE_DIR + this.imageName + UvMapper.IMAGE_BRIGHTNESS_ARGS;
+//		System.out.print(this.imageName);
+		System.out.print(".");
+		this.brightness = Terminal.execToFloat(command);
+		this.brightnessFlag = this.brightness > UvMapper.IMAGE_BRIGHTNESS_FLAG_LINE ? 1 : 0;
+	
+		return this.brightness;
+	}
+  
+	public int getBrightnessFlag () {
+		return this.brightnessFlag;
+	}
+
 	public static ArrayList<UvImage> loadFolder(PApplet p, String dir) {
 		return fromFolder(p, dir, Integer.MAX_VALUE);
 	}
-	
+
 	public static ArrayList<UvImage> fromFolder(PApplet p, String dir, int maxNum) {
 
 		// Load images into UvImage objects
@@ -86,7 +116,10 @@ public class UvImage {
 				break;
 		}
 
-	  // sort the images by area
+		
+		System.out.println("\nLoaded "+ads.size()+" images");
+		
+		 // sort the images by area
 		ads.sort(new Comparator<UvImage>() {
 
 			public int compare(UvImage img1, UvImage img2) {
@@ -98,9 +131,7 @@ public class UvImage {
 				else
 					return 1;
 			}
-		});
-		
-		System.out.println("\nLoaded "+ads.size()+" images");
+		});	
 		
 		return ads;
 	}
