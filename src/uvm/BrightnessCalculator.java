@@ -1,5 +1,8 @@
 package uvm;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import processing.core.PApplet;
@@ -7,24 +10,52 @@ import processing.core.PImage;
 
 public class BrightnessCalculator extends PApplet {
 
-	public static String DATA_FILE = "data/Bertha_latest.txt";
-	public static String BRIGHTNESS_FILE = "data/texture.jpeg";
-	public static String UV_NAME = "BarthaTest.png";
-	public static String OUTPUT_DIR = "data/";
+	public static String DATA_FILE = "data/berthaFinal.txt";
+	public static String BRIGHTNESS_FILE = "data/textureNew.jpg";
+
+	public static String IMAGE_DIR = "BerthaDouble/";
+	public static int MAX_NUM_IMGS_TO_LOAD = 2600;
 
 	List<Quad> quads;
+	List<UvImage> ads;
 	PImage img;
+	ArrayList<Float> brightnessData = new ArrayList<Float>();
+	int[] count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+	ArrayList<Float> imageBrightnessData = new ArrayList<Float>();
+	int[] imageCount = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	public void settings() {
 
-		size(1000, 1000);
+		size(2000, 2000);
 		img = loadImage(BRIGHTNESS_FILE);
 		img.loadPixels();
-		
-		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 	}
 
 	public void setup() {
+
+		calculateForQuads();
+//		calculateForImages();
+
+	}
+
+	public void calculateForImages() {
+
+		ads = UvImage.fromFolder(this, IMAGE_DIR, 5000);
+		calculateImagesBrightness();
+
+		System.out.println("Brightness range of Images: ");
+
+		for (int i = 0; i < imageCount.length; i++) {
+			System.out.println("0." + i + "- 0." + (i + 1) + ":" + imageCount[i]);
+		}
+
+		// imageBrightnessData -> imageBrightness.txt
+		writeToFile(imageBrightnessData, "imageBrightness");
+
+	}
+
+	public void calculateForQuads() {
 
 		quads = Quad.fromData(this, DATA_FILE);
 
@@ -49,8 +80,52 @@ public class BrightnessCalculator extends PApplet {
 		}
 
 		System.out.println("Brightness range of the image: " + min + "-" + max);
+
 		calculateAllBrightness();
-		// save to data
+
+		System.out.println("Brightness range of Quad: ");
+
+		for (int i = 0; i < count.length; i++) {
+			System.out.println("0." + i + "- 0." + (i + 1) + ":" + count[i]);
+		}
+
+		for (int i = 0; i < quads.size(); i++) {
+			System.out.print("Quad[" + i + "]");
+			System.out.println(quads.get(i).brightness);
+		}
+
+		writeToFile(brightnessData, "quadBrightness");
+	}
+
+	public void writeToFile(ArrayList<Float> arr, String name) {
+
+		FileWriter writer;
+		try {
+			writer = new FileWriter("data/" + name + ".txt");
+			for (float str : arr) {
+				String line = Float.toString(str) + "\n";
+				writer.write(line);
+			}
+			writer.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void calculateImagesBrightness() {
+
+		for (int i = 0; i < ads.size(); i++) {
+			UvImage img = ads.get(i);
+			float b = img.brightness;
+
+			imageBrightnessData.add(b);
+			System.out.println(img.imageName + ":" + b);
+			int range = (int) Math.floor(b * 10);
+			if (range >= 0 && range < 10) imageCount[range]++;
+
+		}
 
 	}
 
@@ -63,9 +138,14 @@ public class BrightnessCalculator extends PApplet {
 
 		for (int i = 0; i < quads.size(); i++) {
 			Quad quad = quads.get(i);
-			quad.computeBrightness(img);
-		}
+			float b = quad.computeBrightness(img, this);
 
+			brightnessData.add(b);
+			// System.out.println(b);
+			int range = (int) Math.floor(b * 10);
+			count[range]++;
+
+		}
 	}
 
 	public static void main(String[] args) {

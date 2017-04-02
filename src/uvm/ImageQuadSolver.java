@@ -8,7 +8,6 @@ public class ImageQuadSolver {
 
 	protected UvImage[] workers;
 	protected Quad[] jobs;
-	protected float weight1 = 1, weight2 = 0;
 	//default is to use first approach and ignore the second;
 
 	public ImageQuadSolver(List<UvImage> images, List<Quad> quads) {
@@ -38,11 +37,13 @@ public class ImageQuadSolver {
 	public void assign() {
 
 		int[] pairings = new HungarianAlgorithm(computeCostMatrix()).execute();
+		
 		for (int i = 0; i < pairings.length; i++) {
 			if (pairings[i] != -1) {
 				jobs[pairings[i]].assignImage(workers[i]);
+				System.out.println(i+"/"+ pairings.length + ") Quad@" + jobs[pairings[i]].id + " :: Image#"+workers[i].imageName);
 			}
-			// System.out.println(i+") Quad@"+jobs.get(result[i]).id+" :: Image#"+workers.get(i).imageName);
+			
 		}
 	}
 
@@ -57,11 +58,6 @@ public class ImageQuadSolver {
 		return computeCostMatrix()[imageIndexI][quadIndexJ];
 	}
 	
-	public void setWeights(float w1, float w2) {
-		weight1 = w1;
-		weight2 = w2;
-	}
-
 	/**
 	 * Computes the matrix of costs for each worker/image pair
 	 * 
@@ -76,7 +72,7 @@ public class ImageQuadSolver {
 		double[][] matrix = new double[workers.length][jobs.length];
 		for (int i = 0; i < workers.length; i++) {
 			for (int j = 0; j < jobs.length; j++) {
-				matrix[i][j] = jobs[j].fitness(workers[i], workersUnit, jobsUnit, weight1, weight2);
+				matrix[i][j] = jobs[j].fitness(workers[i], workersUnit, jobsUnit, UvMapper.WEIGHT_DIST, UvMapper.WEIGHT_MAX);
 			}
 		}
 		return matrix;
